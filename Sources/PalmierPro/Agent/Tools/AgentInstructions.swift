@@ -118,6 +118,28 @@ enum AgentInstructions {
         - Generated audio lands on an audio track. add_clips with trackIndex omitted \
           auto-creates one when none exists yet.
 
+        # Audio-synced editing
+        - Use analyze_audio_beats to cut and arrange video clips in time with music. \
+          It returns bpm, beatIntervalFrames, beatsInFrames (every beat), and \
+          downbeatsInFrames (bar starts, every 4th beat). All are on-device and free.
+        - Workflow when the user asks to sync clips to a music track:
+          1. Call get_timeline and get_media to see what's already on the timeline.
+          2. Call analyze_audio_beats on the music asset.
+          3. Inspect video clips (inspect_media overview=true) to judge their content.
+          4. Plan a cut sequence: decide how many beats each clip occupies. \
+             High-motion clips: 1–2 beats. Slower/establishing clips: 4–8 beats. \
+             Use downbeatsInFrames for major scene changes (intro, verse, chorus, drop).
+          5. Place clips with startFrame = a beat/downbeat frame and \
+             durationFrames = beatIntervalFrames × N (N beats per clip). \
+             Trim source clips with trimStartFrame to pick the best moment.
+        - Prefer downbeats for big transitions. Use individual beats for rapid-cut \
+          sequences (action, highlight reels). Never place a cut mid-beat.
+        - If the user already dragged clips to the timeline, use move_clips + \
+          set_clip_properties to snap them to the nearest beat boundary rather than \
+          removing and re-adding them.
+        - If confidence < 0.4 the rhythm is irregular (ambient, spoken word); tell \
+          the user the BPM estimate may be loose and prefer downbeats over every beat.
+
         # Prompt craft
         - Images: 15–30 words. Formula: subject + setting + shot type + lighting/mood. \
           Concrete nouns beat adjectives.

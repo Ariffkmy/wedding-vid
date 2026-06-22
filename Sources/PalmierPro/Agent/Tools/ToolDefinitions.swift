@@ -33,6 +33,7 @@ enum ToolName: String, CaseIterable, Sendable {
     case renameFolder = "rename_folder"
     case deleteMedia = "delete_media"
     case deleteFolder = "delete_folder"
+    case analyzeAudioBeats = "analyze_audio_beats"
 }
 
 struct AgentTool: @unchecked Sendable {
@@ -583,6 +584,16 @@ enum ToolDefinitions {
                 properties: [
                     "type": ["type": "string", "enum": ["video", "image", "audio", "upscale"], "description": "Filter by type. Omit to list all models."],
                 ]
+            )
+        ),
+        AgentTool(
+            name: .analyzeAudioBeats,
+            description: "Analyzes the rhythm of an audio or video asset on-device and returns beat timestamps in both seconds and project frames. Use this before arranging video clips to music: the returned beatsInFrames array gives the exact frame values where cuts should land to stay on-beat. Returns: bpm (estimated tempo), beatIntervalFrames (frames per beat — use as durationFrames for one-beat clips), beats/beatsInFrames (every beat), downbeats/downbeatsInFrames (bar starts, every 4th beat — prefer these for major scene cuts), confidence (0–1, higher = steadier rhythm), beatCount, downbeatCount. Runs entirely on-device; free and fast (typically under 2 seconds per song).",
+            inputSchema: objectSchema(
+                properties: [
+                    "mediaRef": ["type": "string", "description": "Asset ID from get_media. Must be an audio asset or a video asset that has audio."],
+                ],
+                required: ["mediaRef"]
             )
         ),
     ]

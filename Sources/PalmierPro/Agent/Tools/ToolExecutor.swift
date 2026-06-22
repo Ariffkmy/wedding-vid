@@ -95,6 +95,7 @@ final class ToolExecutor {
         case .upscaleMedia:  return try upscaleMedia(editor, args)
         case .importMedia:   return try await importMedia(editor, args)
         case .listModels:    return listModels(args)
+        case .analyzeAudioBeats: return try await analyzeAudioBeats(editor, args)
         case .listFolders:   return listFolders(editor)
         case .createFolder:  return try createFolder(editor, args)
         case .moveToFolder:  return try moveToFolder(editor, args)
