@@ -44,9 +44,12 @@ MOMENT_AUDIO = {
 # Keywords in culturalNotes that force feature-original (speech/audio is crucial).
 AUDIO_KEYWORDS = ("vow", "speech", "interview", "silent", "reverent", "doa", "audio", "recit")
 
-# Frequency thresholds -> importance.
-CORE_MIN = 40
-OPTIONAL_MIN = 10
+# Drop low-confidence moment labels so the pack is built from trustworthy data only.
+CONFIDENCE_MIN = 0.8
+
+# Importance thresholds as a fraction of the kept dataset, so they scale with its size.
+CORE_FRAC = 0.15
+OPTIONAL_FRAC = 0.04
 
 # Per-ceremony category whitelist (which moments belong to each ceremony's arc).
 CEREMONY_CATEGORIES = {
@@ -58,14 +61,20 @@ CEREMONY_CATEGORIES = {
 TUNANG_EXCLUDE = {"akad_nikah"}
 
 
-def load_records() -> list[dict]:
+def load_records() -> tuple[list[dict], int]:
+    """Returns (kept records at/above CONFIDENCE_MIN, total records read)."""
     path = SRC_DIR / "references_malay_wedding.jsonl"
-    records = []
+    kept, total = [], 0
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if line:
-            records.append(json.loads(line))
-    return records
+        if not line:
+            continue
+        total += 1
+        rec = json.loads(line)
+        conf = rec.get("labelConfidence")
+        if conf is None or conf >= CONFIDENCE_MIN:
+            kept.append(rec)
+    return kept, total
 
 
 def category_of(moment: str, categories: dict[str, list[str]]) -> str:
@@ -75,10 +84,11 @@ def category_of(moment: str, categories: dict[str, list[str]]) -> str:
     return "scene"
 
 
-def importance_of(count: int) -> str:
-    if count >= CORE_MIN:
+def importance_of(count: int, total: int) -> str:
+    frac = count / total if total else 0
+    if frac >= CORE_FRAC:
         return "core"
-    if count >= OPTIONAL_MIN:
+    if frac >= OPTIONAL_FRAC:
         return "optional"
     return "filler"
 
@@ -101,9 +111,12 @@ def top_values(counter: Counter, n: int) -> list[str]:
 
 def build() -> dict:
     taxonomy = json.loads((SRC_DIR / "taxonomy_malay_wedding.json").read_text(encoding="utf-8"))
-    records = load_records()
+    records, total_read = load_records()
 
-    moment_counts: Counter = Counter(taxonomy.get("momentTypes", {}))
+    # Moment frequencies come from the kept (high-confidence) records, not the taxonomy,
+    # so importance stays consistent with whatever data we actually built from.
+    moment_counts: Counter = Counter(m for r in records for m in r.get("momentTypes", []))
+    kept_total = len(records)
     categories: dict[str, list[str]] = taxonomy.get("momentCategories", {})
     preferred_composition = taxonomy.get("preferredComposition", "")
 
@@ -131,7 +144,7 @@ def build() -> dict:
             cue_bits.append(rep_note)
         moments[moment] = {
             "category": category,
-            "importance": importance_of(count),
+            "importance": importance_of(count, kept_total),
             "audioPolicy": audio_policy_of(moment, category, rep_note),
             "preferredShots": top_values(preferred.get(moment, Counter()), 3),
             "avoidQualities": top_values(avoid.get(moment, Counter()), 3) or ["blurry", "shaky"],
@@ -157,6 +170,9 @@ def build() -> dict:
         "culture": taxonomy.get("culture", ""),
         "audioPatterns": taxonomy.get("audioPatterns", ""),
         "typicalPacing": taxonomy.get("typicalPacing", ""),
+        "confidenceMin": CONFIDENCE_MIN,
+        "recordsKept": kept_total,
+        "recordsTotal": total_read,
         "moments": moments,
         "ceremonies": ceremonies,
     }
@@ -167,7 +183,8 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(pack, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Wrote {OUT.relative_to(ROOT)} — {len(pack['moments'])} moments, "
-          f"{len(pack['ceremonies'])} ceremonies.")
+          f"{len(pack['ceremonies'])} ceremonies "
+          f"(kept {pack['recordsKept']}/{pack['recordsTotal']} records at confidence >= {CONFIDENCE_MIN}).")
 
 
 if __name__ == "__main__":

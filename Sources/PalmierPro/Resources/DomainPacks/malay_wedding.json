@@ -6,40 +6,41 @@
       "couple_portrait",
       "venue_establishing",
       "decor_detail",
-      "hantaran_detail",
       "bride_prep",
       "groom_prep",
+      "hantaran_detail",
       "akad_nikah",
       "ring_exchange",
       "salam_family",
-      "guest_reaction",
-      "family_portrait"
+      "family_portrait",
+      "guest_reaction"
     ],
     "reception": [
       "couple_portrait",
       "venue_establishing",
       "decor_detail",
       "salam_family",
-      "guest_reaction",
       "family_portrait",
+      "guest_reaction",
       "reception",
       "pelamin",
-      "makan_beradab",
-      "exit_or_closing"
+      "exit_or_closing",
+      "makan_beradab"
     ],
     "tunang": [
       "couple_portrait",
       "venue_establishing",
       "decor_detail",
-      "hantaran_detail",
       "bride_prep",
       "groom_prep",
+      "hantaran_detail",
       "ring_exchange",
       "salam_family",
-      "guest_reaction",
-      "family_portrait"
+      "family_portrait",
+      "guest_reaction"
     ]
   },
+  "confidenceMin": 0.8,
   "culture": "Malay (Malaysia/Singapore/Brunei)",
   "domain": "malay_wedding",
   "moments": {
@@ -58,31 +59,31 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 125
+      "referenceCount": 191
     },
     "bride_prep": {
       "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "backlit_faces",
+        "blurry"
       ],
       "category": "preparation",
-      "classificationCues": "bride prep — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "classificationCues": "bride prep — closeup for reactions, wide for venue/scene, medium for akad — Groom wearing Baju Melayu with samping and tanjak (headgear). Family members help with dressing. Usually shot in bedroom or family home.",
       "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 12
+      "referenceCount": 52
     },
     "couple_portrait": {
       "audioPolicy": "music-bed-ok",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "backlit_faces",
+        "blocked_view",
+        "blurry"
       ],
       "category": "scene",
       "classificationCues": "couple portrait — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -92,92 +93,92 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 65
+      "referenceCount": 148
     },
     "decor_detail": {
       "audioPolicy": "music-bed-ok",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "overexposed",
+        "blurry"
       ],
       "category": "scene",
-      "classificationCues": "decor detail — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "classificationCues": "decor detail — closeup for reactions, wide for venue/scene, medium for akad — Couple exits venue through flower petal toss or confetti. Car departure with family waving. Final shot often slow motion.",
       "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 17
+      "referenceCount": 25
     },
     "exit_or_closing": {
       "audioPolicy": "music-bed-ok",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "backlit_faces",
+        "blurry"
       ],
       "category": "celebration",
-      "classificationCues": "exit or closing — closeup for reactions, wide for venue/scene, medium for akad — Bersanding ceremony on the pelamin (wedding throne). Couple seated with family around. Music is often traditional or slow romantic.",
-      "importance": "optional",
+      "classificationCues": "exit or closing — closeup for reactions, wide for venue/scene, medium for akad — Couple exits venue through flower petal toss or confetti. Car departure with family waving. Final shot often slow motion.",
+      "importance": "filler",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
-        "medium_shot"
+        "cinematic"
       ],
-      "referenceCount": 10
+      "referenceCount": 24
     },
     "family_portrait": {
       "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "crowd_blocking",
+        "backlit_faces",
+        "blurry"
       ],
       "category": "family",
-      "classificationCues": "family portrait — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
-      "importance": "filler",
+      "classificationCues": "family portrait — closeup for reactions, wide for venue/scene, medium for akad — Multi-generational family photo after the ceremony. Includes parents, grandparents, siblings. Taken at venue entrance or pelamin area.",
+      "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
-        "medium_shot"
+        "cinematic"
       ],
-      "referenceCount": 2
+      "referenceCount": 38
     },
     "groom_prep": {
       "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "blocked_view",
+        "blurry"
       ],
       "category": "preparation",
-      "classificationCues": "groom prep — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "filler",
-      "preferredShots": [
-        "clear_faces",
-        "stable_camera",
-        "medium_shot"
-      ],
-      "referenceCount": 2
-    },
-    "guest_reaction": {
-      "audioPolicy": "ambient",
-      "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
-      ],
-      "category": "family",
-      "classificationCues": "guest reaction — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
+      "classificationCues": "groom prep — closeup for reactions, wide for venue/scene, medium for akad — Groom wearing Baju Melayu with samping and tanjak (headgear). Family members help with dressing. Usually shot in bedroom or family home.",
       "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 10
+      "referenceCount": 34
+    },
+    "guest_reaction": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "back_of_head_only",
+        "blurry",
+        "soft_focus"
+      ],
+      "category": "family",
+      "classificationCues": "guest reaction — closeup for reactions, wide for venue/scene, medium for akad — Candid emotional reactions from family and friends. Tears during akad, smiles during reception, children playing. Unscripted moments.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 35
     },
     "hantaran_detail": {
       "audioPolicy": "ambient",
@@ -187,8 +188,8 @@
         "shaky"
       ],
       "category": "preparation",
-      "classificationCues": "hantaran detail — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "optional",
+      "classificationCues": "hantaran detail — closeup for reactions, wide for venue/scene, medium for akad — Couple exits venue through flower petal toss or confetti. Car departure with family waving. Final shot often slow motion.",
+      "importance": "filler",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
@@ -205,13 +206,13 @@
       ],
       "category": "celebration",
       "classificationCues": "makan beradab — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
-      "importance": "optional",
+      "importance": "filler",
       "preferredShots": [
-        "clear_faces",
         "stable_camera",
+        "clear_faces",
         "medium_shot"
       ],
-      "referenceCount": 13
+      "referenceCount": 9
     },
     "pelamin": {
       "audioPolicy": "music-bed-ok",
@@ -222,13 +223,13 @@
       ],
       "category": "celebration",
       "classificationCues": "pelamin — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "core",
+      "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 95
+      "referenceCount": 82
     },
     "reception": {
       "audioPolicy": "music-bed-ok",
@@ -245,7 +246,7 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 101
+      "referenceCount": 124
     },
     "ring_exchange": {
       "audioPolicy": "feature-original",
@@ -256,13 +257,13 @@
       ],
       "category": "ceremony",
       "classificationCues": "ring exchange — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "core",
+      "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 42
+      "referenceCount": 35
     },
     "salam_family": {
       "audioPolicy": "feature-original",
@@ -272,14 +273,14 @@
         "shaky"
       ],
       "category": "family",
-      "classificationCues": "salam family — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
-      "importance": "core",
+      "classificationCues": "salam family — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 42
+      "referenceCount": 57
     },
     "venue_establishing": {
       "audioPolicy": "music-bed-ok",
@@ -290,14 +291,16 @@
       ],
       "category": "scene",
       "classificationCues": "venue establishing — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "core",
+      "importance": "optional",
       "preferredShots": [
-        "clear_faces",
         "stable_camera",
+        "clear_faces",
         "medium_shot"
       ],
-      "referenceCount": 53
+      "referenceCount": 82
     }
   },
+  "recordsKept": 608,
+  "recordsTotal": 676,
   "typicalPacing": "slow_romantic for ceremony, mixed for reception highlights"
 }
