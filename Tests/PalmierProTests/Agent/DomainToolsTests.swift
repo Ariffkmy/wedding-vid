@@ -52,7 +52,9 @@ struct DomainPackBundleTests {
             Issue.record("malay_wedding domain pack not found in bundle")
             return
         }
-        #expect(pack.moments.count == 15)
+        // At least the original 15 (the taxonomy grows as more scenes are labeled).
+        #expect(pack.moments.count >= 15)
+        #expect(pack.moment("editorial_transition") == nil)   // transition artifact, excluded
         #expect(pack.ceremony("nikah")?.isEmpty == false)
         // Akad audio must be featured; it's the signature audio-crucial moment.
         #expect(pack.moment("akad_nikah")?.audioPolicy == "feature-original")

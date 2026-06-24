@@ -3,38 +3,44 @@
   "audioPatterns": "traditional music during pelamin, silent/reverent during akad, upbeats for reception",
   "ceremonies": {
     "nikah": [
-      "decor_detail",
       "venue_establishing",
+      "decor_detail",
       "couple_portrait",
       "bride_prep",
       "groom_prep",
       "hantaran_detail",
+      "groom_arrival",
       "ring_exchange",
+      "bride_entrance",
       "akad_nikah",
+      "bride_processional",
       "guest_reaction",
       "salam_family",
       "family_portrait"
     ],
     "reception": [
-      "decor_detail",
       "venue_establishing",
+      "decor_detail",
       "couple_portrait",
       "guest_reaction",
       "salam_family",
       "family_portrait",
-      "reception",
       "pelamin",
+      "reception",
       "makan_beradab",
       "exit_or_closing"
     ],
     "tunang": [
-      "decor_detail",
       "venue_establishing",
+      "decor_detail",
       "couple_portrait",
       "bride_prep",
       "groom_prep",
       "hantaran_detail",
+      "groom_arrival",
       "ring_exchange",
+      "bride_entrance",
+      "bride_processional",
       "guest_reaction",
       "salam_family",
       "family_portrait"
@@ -47,227 +53,285 @@
     "commonNext": {
       "akad_nikah": [
         {
-          "fraction": 0.37,
+          "fraction": 0.19,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.15,
           "moment": "couple_portrait"
         },
         {
           "fraction": 0.12,
-          "moment": "reception"
-        },
-        {
-          "fraction": 0.1,
-          "moment": "venue_establishing"
+          "moment": "pelamin"
         }
       ],
-      "bride_prep": [
-        {
-          "fraction": 0.19,
-          "moment": "akad_nikah"
-        },
-        {
-          "fraction": 0.14,
-          "moment": "reception"
-        },
-        {
-          "fraction": 0.14,
-          "moment": "venue_establishing"
-        }
-      ],
-      "couple_portrait": [
-        {
-          "fraction": 0.24,
-          "moment": "akad_nikah"
-        },
-        {
-          "fraction": 0.16,
-          "moment": "venue_establishing"
-        },
-        {
-          "fraction": 0.14,
-          "moment": "bride_prep"
-        }
-      ],
-      "decor_detail": [
+      "bride_entrance": [
         {
           "fraction": 0.33,
           "moment": "akad_nikah"
         },
         {
-          "fraction": 0.11,
-          "moment": "pelamin"
+          "fraction": 0.17,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.17,
+          "moment": "groom_prep"
+        }
+      ],
+      "bride_prep": [
+        {
+          "fraction": 0.29,
+          "moment": "groom_prep"
+        },
+        {
+          "fraction": 0.13,
+          "moment": "couple_portrait"
+        },
+        {
+          "fraction": 0.12,
+          "moment": "akad_nikah"
+        }
+      ],
+      "bride_processional": [
+        {
+          "fraction": 0.5,
+          "moment": "groom_arrival"
+        },
+        {
+          "fraction": 0.5,
+          "moment": "akad_nikah"
+        }
+      ],
+      "couple_portrait": [
+        {
+          "fraction": 0.25,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.16,
+          "moment": "akad_nikah"
         },
         {
           "fraction": 0.11,
           "moment": "venue_establishing"
         }
       ],
-      "exit_or_closing": [
+      "decor_detail": [
         {
-          "fraction": 0.5,
-          "moment": "guest_reaction"
+          "fraction": 0.38,
+          "moment": "bride_prep"
         },
         {
-          "fraction": 0.5,
-          "moment": "bride_prep"
+          "fraction": 0.12,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.06,
+          "moment": "reception"
+        }
+      ],
+      "exit_or_closing": [
+        {
+          "fraction": 0.39,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.14,
+          "moment": "couple_portrait"
+        },
+        {
+          "fraction": 0.14,
+          "moment": "akad_nikah"
         }
       ],
       "family_portrait": [
         {
           "fraction": 0.38,
-          "moment": "couple_portrait"
-        },
-        {
-          "fraction": 0.25,
           "moment": "reception"
-        },
-        {
-          "fraction": 0.12,
-          "moment": "salam_family"
-        }
-      ],
-      "groom_prep": [
-        {
-          "fraction": 0.38,
-          "moment": "akad_nikah"
-        },
-        {
-          "fraction": 0.12,
-          "moment": "couple_portrait"
-        },
-        {
-          "fraction": 0.12,
-          "moment": "pelamin"
-        }
-      ],
-      "guest_reaction": [
-        {
-          "fraction": 0.29,
-          "moment": "reception"
-        },
-        {
-          "fraction": 0.21,
-          "moment": "akad_nikah"
-        },
-        {
-          "fraction": 0.14,
-          "moment": "couple_portrait"
-        }
-      ],
-      "hantaran_detail": [
-        {
-          "fraction": 1.0,
-          "moment": "akad_nikah"
-        }
-      ],
-      "makan_beradab": [
-        {
-          "fraction": 1.0,
-          "moment": "exit_or_closing"
-        }
-      ],
-      "pelamin": [
-        {
-          "fraction": 0.29,
-          "moment": "reception"
-        },
-        {
-          "fraction": 0.29,
-          "moment": "akad_nikah"
-        },
-        {
-          "fraction": 0.14,
-          "moment": "guest_reaction"
-        }
-      ],
-      "reception": [
-        {
-          "fraction": 0.35,
-          "moment": "guest_reaction"
         },
         {
           "fraction": 0.19,
           "moment": "couple_portrait"
         },
         {
+          "fraction": 0.17,
+          "moment": "salam_family"
+        }
+      ],
+      "groom_arrival": [
+        {
+          "fraction": 0.33,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.33,
+          "moment": "bride_entrance"
+        },
+        {
+          "fraction": 0.33,
+          "moment": "guest_reaction"
+        }
+      ],
+      "groom_prep": [
+        {
+          "fraction": 0.34,
+          "moment": "bride_prep"
+        },
+        {
+          "fraction": 0.14,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.11,
+          "moment": "reception"
+        }
+      ],
+      "guest_reaction": [
+        {
+          "fraction": 0.24,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.22,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.09,
+          "moment": "pelamin"
+        }
+      ],
+      "hantaran_detail": [
+        {
+          "fraction": 0.25,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.17,
+          "moment": "bride_prep"
+        },
+        {
+          "fraction": 0.08,
+          "moment": "decor_detail"
+        }
+      ],
+      "makan_beradab": [
+        {
+          "fraction": 0.5,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.17,
+          "moment": "couple_portrait"
+        },
+        {
+          "fraction": 0.17,
+          "moment": "exit_or_closing"
+        }
+      ],
+      "pelamin": [
+        {
+          "fraction": 0.33,
+          "moment": "reception"
+        },
+        {
+          "fraction": 0.24,
+          "moment": "akad_nikah"
+        },
+        {
+          "fraction": 0.08,
+          "moment": "guest_reaction"
+        }
+      ],
+      "reception": [
+        {
+          "fraction": 0.18,
+          "moment": "couple_portrait"
+        },
+        {
+          "fraction": 0.17,
+          "moment": "akad_nikah"
+        },
+        {
           "fraction": 0.12,
-          "moment": "family_portrait"
+          "moment": "guest_reaction"
         }
       ],
       "ring_exchange": [
         {
-          "fraction": 0.25,
-          "moment": "family_portrait"
+          "fraction": 0.44,
+          "moment": "akad_nikah"
         },
         {
-          "fraction": 0.25,
-          "moment": "venue_establishing"
+          "fraction": 0.12,
+          "moment": "reception"
         },
         {
-          "fraction": 0.25,
-          "moment": "decor_detail"
+          "fraction": 0.12,
+          "moment": "pelamin"
         }
       ],
       "salam_family": [
         {
-          "fraction": 0.42,
+          "fraction": 0.31,
           "moment": "akad_nikah"
         },
         {
-          "fraction": 0.25,
+          "fraction": 0.18,
           "moment": "family_portrait"
         },
         {
-          "fraction": 0.25,
-          "moment": "couple_portrait"
+          "fraction": 0.16,
+          "moment": "reception"
         }
       ],
       "venue_establishing": [
         {
-          "fraction": 0.35,
+          "fraction": 0.23,
           "moment": "couple_portrait"
         },
         {
-          "fraction": 0.21,
-          "moment": "akad_nikah"
+          "fraction": 0.18,
+          "moment": "bride_prep"
         },
         {
-          "fraction": 0.15,
-          "moment": "salam_family"
+          "fraction": 0.18,
+          "moment": "akad_nikah"
         }
       ]
     },
     "note": "How real editors actually sequence shots (deduped per-video timelines). A market-trend guide — the canonical ceremony order is still the safe default.",
     "openingMoments": [
       {
-        "fraction": 0.27,
+        "fraction": 0.28,
         "moment": "bride_prep"
       },
       {
-        "fraction": 0.21,
+        "fraction": 0.24,
         "moment": "venue_establishing"
       },
       {
-        "fraction": 0.16,
+        "fraction": 0.14,
         "moment": "couple_portrait"
       },
       {
-        "fraction": 0.09,
-        "moment": "akad_nikah"
+        "fraction": 0.11,
+        "moment": "reception"
       },
       {
-        "fraction": 0.09,
-        "moment": "reception"
+        "fraction": 0.08,
+        "moment": "akad_nikah"
       }
     ],
-    "videosAnalyzed": 75
+    "videosAnalyzed": 76
   },
   "moments": {
     "akad_nikah": {
       "audioPolicy": "feature-original",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "zoom_in_out",
+        "crowd_blocking"
       ],
       "category": "ceremony",
       "classificationCues": "akad nikah — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -277,8 +341,24 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 191,
-      "typicalDurationSec": 49
+      "referenceCount": 460,
+      "typicalDurationSec": 3
+    },
+    "bride_entrance": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "shaky_camera",
+        "backlit_faces"
+      ],
+      "category": "ceremony",
+      "classificationCues": "bride entrance — closeup for reactions, wide for venue/scene, medium for akad — A bride in a white veil and dress walks forward, holding a bouquet.",
+      "importance": "filler",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera"
+      ],
+      "referenceCount": 7,
+      "typicalDurationSec": 2
     },
     "bride_prep": {
       "audioPolicy": "ambient",
@@ -295,8 +375,24 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 52,
-      "typicalDurationSec": 31
+      "referenceCount": 251,
+      "typicalDurationSec": 2
+    },
+    "bride_processional": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "shaky_camera",
+        "backlit_faces"
+      ],
+      "category": "ceremony",
+      "classificationCues": "bride processional — closeup for reactions, wide for venue/scene, medium for akad — The bride walks down a path.",
+      "importance": "filler",
+      "preferredShots": [
+        "clear_faces",
+        "blurry_faces"
+      ],
+      "referenceCount": 3,
+      "typicalDurationSec": 2
     },
     "couple_portrait": {
       "audioPolicy": "music-bed-ok",
@@ -307,17 +403,17 @@
       ],
       "category": "scene",
       "classificationCues": "couple portrait — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "core",
+      "importance": "optional",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 148,
-      "typicalDurationSec": 21
+      "referenceCount": 269,
+      "typicalDurationSec": 4
     },
     "decor_detail": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
         "shaky_camera",
         "overexposed",
@@ -325,17 +421,17 @@
       ],
       "category": "scene",
       "classificationCues": "decor detail — closeup for reactions, wide for venue/scene, medium for akad — Couple exits venue through flower petal toss or confetti. Car departure with family waving. Final shot often slow motion.",
-      "importance": "optional",
+      "importance": "filler",
       "preferredShots": [
-        "clear_faces",
         "stable_camera",
+        "clear_faces",
         "medium_shot"
       ],
-      "referenceCount": 25,
-      "typicalDurationSec": 1
+      "referenceCount": 55,
+      "typicalDurationSec": 2
     },
     "exit_or_closing": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
         "shaky_camera",
         "backlit_faces",
@@ -349,11 +445,11 @@
         "stable_camera",
         "cinematic"
       ],
-      "referenceCount": 24,
-      "typicalDurationSec": 25
+      "referenceCount": 63,
+      "typicalDurationSec": 3
     },
     "family_portrait": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
         "crowd_blocking",
         "backlit_faces",
@@ -367,8 +463,23 @@
         "stable_camera",
         "cinematic"
       ],
-      "referenceCount": 38,
-      "typicalDurationSec": 31
+      "referenceCount": 95,
+      "typicalDurationSec": 2
+    },
+    "groom_arrival": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "shaky_camera",
+        "backlit_faces"
+      ],
+      "category": "preparation",
+      "classificationCues": "groom arrival — closeup for reactions, wide for venue/scene, medium for akad — A man in traditional Malay attire, wearing a songkok, smiles and waves.",
+      "importance": "filler",
+      "preferredShots": [
+        "clear_faces"
+      ],
+      "referenceCount": 3,
+      "typicalDurationSec": 2
     },
     "groom_prep": {
       "audioPolicy": "ambient",
@@ -385,8 +496,8 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 34,
-      "typicalDurationSec": 20
+      "referenceCount": 134,
+      "typicalDurationSec": 2
     },
     "guest_reaction": {
       "audioPolicy": "ambient",
@@ -403,15 +514,15 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 35,
-      "typicalDurationSec": 5
+      "referenceCount": 89,
+      "typicalDurationSec": 2
     },
     "hantaran_detail": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "backlit_faces",
+        "blurry"
       ],
       "category": "preparation",
       "classificationCues": "hantaran detail — closeup for reactions, wide for venue/scene, medium for akad — Couple exits venue through flower petal toss or confetti. Car departure with family waving. Final shot often slow motion.",
@@ -421,11 +532,11 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 17,
-      "typicalDurationSec": 40
+      "referenceCount": 54,
+      "typicalDurationSec": 2
     },
     "makan_beradab": {
-      "audioPolicy": "feature-original",
+      "audioPolicy": "music-bed-ok",
       "avoidQualities": [
         "blurry",
         "soft_focus",
@@ -439,15 +550,15 @@
         "clear_faces",
         "medium_shot"
       ],
-      "referenceCount": 9,
-      "typicalDurationSec": 60
+      "referenceCount": 15,
+      "typicalDurationSec": 2
     },
     "pelamin": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "flashed_photography",
+        "crowd_blocking",
+        "backlit_faces"
       ],
       "category": "celebration",
       "classificationCues": "pelamin — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -457,15 +568,15 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 82,
-      "typicalDurationSec": 34
+      "referenceCount": 145,
+      "typicalDurationSec": 2
     },
     "reception": {
       "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "backlit_faces",
+        "flashed_photography"
       ],
       "category": "celebration",
       "classificationCues": "reception — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -475,8 +586,8 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 124,
-      "typicalDurationSec": 58
+      "referenceCount": 481,
+      "typicalDurationSec": 2
     },
     "ring_exchange": {
       "audioPolicy": "feature-original",
@@ -487,21 +598,21 @@
       ],
       "category": "ceremony",
       "classificationCues": "ring exchange — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
-      "importance": "optional",
+      "importance": "filler",
       "preferredShots": [
         "clear_faces",
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 35,
-      "typicalDurationSec": 10
+      "referenceCount": 48,
+      "typicalDurationSec": 3
     },
     "salam_family": {
-      "audioPolicy": "ambient",
+      "audioPolicy": "music-bed-ok",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "back_of_head_only",
+        "out_of_focus",
+        "crowd_blocking"
       ],
       "category": "family",
       "classificationCues": "salam family — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -511,15 +622,15 @@
         "stable_camera",
         "medium_shot"
       ],
-      "referenceCount": 57,
-      "typicalDurationSec": 40
+      "referenceCount": 114,
+      "typicalDurationSec": 3
     },
     "venue_establishing": {
-      "audioPolicy": "music-bed-ok",
+      "audioPolicy": "ambient",
       "avoidQualities": [
-        "blurry",
-        "soft_focus",
-        "shaky"
+        "shaky_camera",
+        "fast_panning",
+        "overexposed"
       ],
       "category": "scene",
       "classificationCues": "venue establishing — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
@@ -529,11 +640,11 @@
         "clear_faces",
         "medium_shot"
       ],
-      "referenceCount": 82,
-      "typicalDurationSec": 21
+      "referenceCount": 128,
+      "typicalDurationSec": 3
     }
   },
-  "recordsKept": 608,
-  "recordsTotal": 676,
+  "recordsKept": 2091,
+  "recordsTotal": 2339,
   "typicalPacing": "slow_romantic for ceremony, mixed for reception highlights"
 }

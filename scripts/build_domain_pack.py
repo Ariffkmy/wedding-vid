@@ -57,6 +57,9 @@ AUDIO_KEYWORDS = ("vow", "speech", "interview", "silent", "reverent", "doa", "au
 # Drop low-confidence moment labels so the pack is built from trustworthy data only.
 CONFIDENCE_MIN = 0.8
 
+# Non-content labels to drop entirely (transition artifacts, not real shot types).
+EXCLUDE_MOMENTS = {"editorial_transition"}
+
 # Importance thresholds as a fraction of the kept dataset, so they scale with its size.
 CORE_FRAC = 0.15
 OPTIONAL_FRAC = 0.04
@@ -126,7 +129,7 @@ def learned_sequences(records: list[dict]) -> dict | None:
     for r in records:
         pm = r.get("primaryMoment")
         pos = r.get("timecodeStart", r.get("momentSequenceHint"))
-        if pm and pos is not None and r.get("sourceVideoId"):
+        if pm and pm not in EXCLUDE_MOMENTS and pos is not None and r.get("sourceVideoId"):
             byvid[r["sourceVideoId"]].append(r)
 
     timelines: list[list[str]] = []
@@ -168,7 +171,9 @@ def build() -> dict:
 
     # Moment frequencies come from the kept (high-confidence) records, not the taxonomy,
     # so importance stays consistent with whatever data we actually built from.
-    moment_counts: Counter = Counter(m for r in records for m in r.get("momentTypes", []))
+    moment_counts: Counter = Counter(
+        m for r in records for m in r.get("momentTypes", []) if m not in EXCLUDE_MOMENTS
+    )
     kept_total = len(records)
     categories: dict[str, list[str]] = taxonomy.get("momentCategories", {})
     preferred_composition = taxonomy.get("preferredComposition", "")
@@ -196,6 +201,7 @@ def build() -> dict:
             x["timecodeEnd"] - x["timecodeStart"]
             for x in rich_by_moment.get(moment, [])
             if x.get("timecodeStart") is not None and x.get("timecodeEnd") is not None
+            and x["timecodeEnd"] > x["timecodeStart"]
         ]
         return round(statistics.median(spans)) if spans else None
 
