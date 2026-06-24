@@ -35,5 +35,14 @@ models/*/build*/
 models/*/checkpoint*
 models/*/convert*.log
 
-# Local reference research data (scraped videos/frames, not source)
-References/
+# Local reference research data (scraped videos/frames) — ignored except the
+# shot-labeling pipeline + its progress file (re-included level by level).
+References/*
+!References/MalayWedding/
+References/MalayWedding/*
+!References/MalayWedding/scripts/
+References/MalayWedding/scripts/*
+!References/MalayWedding/scripts/shot_label_pipeline.py
+!References/MalayWedding/_temp_vision/
+References/MalayWedding/_temp_vision/*
+!References/MalayWedding/_temp_vision/shot_progress.json
