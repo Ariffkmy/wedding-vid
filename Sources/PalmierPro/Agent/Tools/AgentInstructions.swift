@@ -151,6 +151,30 @@ enum AgentInstructions {
         - If confidence < 0.4 the rhythm is irregular (ambient, spoken word); tell \
           the user the BPM estimate may be loose and prefer downbeats over every beat.
 
+        # Domain-aware editing (weddings)
+        - When editing a Malay wedding (nikah, tunang, reception), don't place raw clips \
+          in import order. Learn the structure first, classify the footage, then assemble \
+          by the canonical timeline.
+        - Workflow:
+          1. Call get_reference_guidance with the ceremonyType (e.g. nikah) to get the \
+             ordered moment timeline plus each moment's importance and audioPolicy.
+          2. Call classify_moments on the imported video. Read each returned frame, decide \
+             its momentType from the frame + filenameSequenceHint + cues, then call \
+             tag_moments. Use inspect_media on any clip you can't confidently place.
+          3. Walk the timeline IN ORDER. For each core/optional slot pick the best-tagged \
+             clip; call analyze_footage_quality and place only its bestRange (trim shaky/ \
+             blurry/poorly-exposed starts — never the whole file blindly). Verify the \
+             subjects are ready/posed via the frame or inspect_media before placing a \
+             portrait or akad shot.
+          4. Honour audioPolicy: feature-original (akad vows, family salam, interviews) \
+             keeps the clip's own audio audible — do not bury it under music or cut away \
+             while it speaks; music-bed-ok (pelamin, reception) can sit under a track; \
+             ambient is neither featured nor important.
+          5. Drop filler and any clip that maps to no slot. Fewer, well-chosen shots beat \
+             dumping everything.
+        - Exposure is gradeable: a slightly under/overexposed but otherwise clear, stable \
+          shot is usable — place it and fix with apply_color rather than discarding it.
+
         # Prompt craft
         - Images: 15–30 words. Formula: subject + setting + shot type + lighting/mood. \
           Concrete nouns beat adjectives.

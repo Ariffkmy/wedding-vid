@@ -66,6 +66,31 @@ extension ToolExecutor {
     }
 }
 
+/// Exposure classification over luma planes (0–255). Internal so it's unit-testable.
+enum FootageExposure {
+    static func classify(planes: [[Float]]) -> (label: String, mean: Double, shadow: Double, highlight: Double) {
+        let nonEmpty = planes.filter { !$0.isEmpty }
+        guard !nonEmpty.isEmpty else { return ("ok", 0, 0, 0) }
+        var sum = 0.0, shadow = 0.0, highlight = 0.0, count = 0.0
+        for plane in nonEmpty {
+            for v in plane {
+                sum += Double(v)
+                if v < 16 { shadow += 1 }
+                if v > 240 { highlight += 1 }
+                count += 1
+            }
+        }
+        let mean = count > 0 ? sum / count : 0
+        let shadowFrac = count > 0 ? shadow / count : 0
+        let highlightFrac = count > 0 ? highlight / count : 0
+        let label: String
+        if mean < 45 || shadowFrac > 0.5 { label = "underexposed" }
+        else if mean > 210 || highlightFrac > 0.2 { label = "overexposed" }
+        else { label = "ok" }
+        return (label, mean, shadowFrac, highlightFrac)
+    }
+}
+
 private enum FootageQualityAnalyzer {
     private struct SharpnessThresholds {
         let blurry: Double
@@ -132,6 +157,7 @@ private enum FootageQualityAnalyzer {
                 "motion: estimated global frame-to-frame translation",
                 "jitter: erratic motion after translation matching; high values usually mean shaky handheld footage",
                 "visualChange: residual luma change; high values can mean subject motion, lighting change, or a cut",
+                "exposure: underexposed/overexposed from mean brightness + shadow/highlight clipping; gradeable via apply_color, so it flags but doesn't exclude from bestRanges",
             ],
             "sharpnessThresholds": [
                 "blurryBelow": thresholds.blurry,
@@ -219,6 +245,7 @@ private enum FootageQualityAnalyzer {
         let staticPenalty = visualChange < 0.015 && motion < 0.05 ? 0.08 : 0
         let highMotionPenalty = motion > 0.6 ? min((motion - 0.6) * 0.25, 0.15) : 0
         let clarity = clarityLabel(sharpness: sharpness, thresholds: thresholds)
+        let exposure = exposureMetrics(frames)
         let blurPenalty: Double = clarity == "clear" ? 0 : (clarity == "soft" ? 0.22 : 0.45)
         let quality = clamp01(
             sharpness * 0.45
@@ -237,6 +264,7 @@ private enum FootageQualityAnalyzer {
         if visualChange < 0.015 && motion < 0.05 { issues.append("static") }
         if motion > 0.65 { issues.append("high motion") }
         if residual > 0.22 { issues.append("large visual change") }
+        if exposure.label != "ok" { issues.append(exposure.label) }
         let isUsable = clarity == "clear" && stability != "shaky"
 
         var out: [String: Any] = [
@@ -251,6 +279,10 @@ private enum FootageQualityAnalyzer {
             "motion": motion,
             "jitter": jitter,
             "visualChange": visualChange,
+            "exposure": exposure.label,
+            "meanLuma": exposure.mean,
+            "shadowClipping": exposure.shadow,
+            "highlightClipping": exposure.highlight,
             "isUsable": isUsable,
             "issues": issues,
         ]
@@ -279,6 +311,11 @@ private enum FootageQualityAnalyzer {
         if sharpness < thresholds.blurry { return "blurry" }
         if sharpness < thresholds.clear { return "soft" }
         return "clear"
+    }
+
+    /// Mean brightness (0–255) plus shadow/highlight clipping fractions over the window's frames.
+    private static func exposureMetrics(_ frames: [FrameMetric]) -> (label: String, mean: Double, shadow: Double, highlight: Double) {
+        FootageExposure.classify(planes: frames.map(\.luma).filter { !$0.isEmpty })
     }
 
     private static func estimateMotion(from a: [Float], to b: [Float], width: Int, height: Int) -> Motion {

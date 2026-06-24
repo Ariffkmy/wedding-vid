@@ -1,0 +1,303 @@
+{
+  "_note": "Derived from AI-reference by scripts/build_domain_pack.py. Heuristic ordering/importance — review and edit by hand.",
+  "audioPatterns": "traditional music during pelamin, silent/reverent during akad, upbeats for reception",
+  "ceremonies": {
+    "nikah": [
+      "couple_portrait",
+      "venue_establishing",
+      "decor_detail",
+      "hantaran_detail",
+      "bride_prep",
+      "groom_prep",
+      "akad_nikah",
+      "ring_exchange",
+      "salam_family",
+      "guest_reaction",
+      "family_portrait"
+    ],
+    "reception": [
+      "couple_portrait",
+      "venue_establishing",
+      "decor_detail",
+      "salam_family",
+      "guest_reaction",
+      "family_portrait",
+      "reception",
+      "pelamin",
+      "makan_beradab",
+      "exit_or_closing"
+    ],
+    "tunang": [
+      "couple_portrait",
+      "venue_establishing",
+      "decor_detail",
+      "hantaran_detail",
+      "bride_prep",
+      "groom_prep",
+      "ring_exchange",
+      "salam_family",
+      "guest_reaction",
+      "family_portrait"
+    ]
+  },
+  "culture": "Malay (Malaysia/Singapore/Brunei)",
+  "domain": "malay_wedding",
+  "moments": {
+    "akad_nikah": {
+      "audioPolicy": "feature-original",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "ceremony",
+      "classificationCues": "akad nikah — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 125
+    },
+    "bride_prep": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "preparation",
+      "classificationCues": "bride prep — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 12
+    },
+    "couple_portrait": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "scene",
+      "classificationCues": "couple portrait — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 65
+    },
+    "decor_detail": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "scene",
+      "classificationCues": "decor detail — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 17
+    },
+    "exit_or_closing": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "celebration",
+      "classificationCues": "exit or closing — closeup for reactions, wide for venue/scene, medium for akad — Bersanding ceremony on the pelamin (wedding throne). Couple seated with family around. Music is often traditional or slow romantic.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 10
+    },
+    "family_portrait": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "family",
+      "classificationCues": "family portrait — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
+      "importance": "filler",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 2
+    },
+    "groom_prep": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "preparation",
+      "classificationCues": "groom prep — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "filler",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 2
+    },
+    "guest_reaction": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "family",
+      "classificationCues": "guest reaction — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 10
+    },
+    "hantaran_detail": {
+      "audioPolicy": "ambient",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "preparation",
+      "classificationCues": "hantaran detail — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 17
+    },
+    "makan_beradab": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "celebration",
+      "classificationCues": "makan beradab — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
+      "importance": "optional",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 13
+    },
+    "pelamin": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "celebration",
+      "classificationCues": "pelamin — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 95
+    },
+    "reception": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "celebration",
+      "classificationCues": "reception — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 101
+    },
+    "ring_exchange": {
+      "audioPolicy": "feature-original",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "ceremony",
+      "classificationCues": "ring exchange — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 42
+    },
+    "salam_family": {
+      "audioPolicy": "feature-original",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "family",
+      "classificationCues": "salam family — closeup for reactions, wide for venue/scene, medium for akad — Family greeting ceremony. Guests offer blessings. Emotional moments. Candid reactions from family.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 42
+    },
+    "venue_establishing": {
+      "audioPolicy": "music-bed-ok",
+      "avoidQualities": [
+        "blurry",
+        "soft_focus",
+        "shaky"
+      ],
+      "category": "scene",
+      "classificationCues": "venue establishing — closeup for reactions, wide for venue/scene, medium for akad — Sacred solemnization ceremony. Focus on groom, wali/tok kadi, and family reactions. Typically uses slow pacing, multiple camera angles.",
+      "importance": "core",
+      "preferredShots": [
+        "clear_faces",
+        "stable_camera",
+        "medium_shot"
+      ],
+      "referenceCount": 53
+    }
+  },
+  "typicalPacing": "slow_romantic for ceremony, mixed for reception highlights"
+}

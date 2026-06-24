@@ -31,6 +31,15 @@ struct MediaManifestEntry: Codable, Sendable, Equatable, Identifiable {
     var folderId: String?
     var cachedRemoteURL: String?
     var cachedRemoteURLExpiresAt: Date?
+    var momentTag: MomentTag?
+}
+
+/// Domain moment classification attached to a media asset (e.g. "akad_nikah").
+struct MomentTag: Codable, Sendable, Equatable {
+    var momentType: String
+    var ceremonyType: String?
+    var confidence: Double
+    var source: String   // filename | vision | agent
 }
 
 struct GenerationInput: Codable, Sendable, Equatable {

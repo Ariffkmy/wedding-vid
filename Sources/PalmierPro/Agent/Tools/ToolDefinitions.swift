@@ -39,6 +39,9 @@ enum ToolName: String, CaseIterable, Sendable {
     case deleteMedia = "delete_media"
     case deleteFolder = "delete_folder"
     case analyzeAudioBeats = "analyze_audio_beats"
+    case getReferenceGuidance = "get_reference_guidance"
+    case classifyMoments = "classify_moments"
+    case tagMoments = "tag_moments"
 }
 
 struct AgentTool: @unchecked Sendable {
@@ -82,7 +85,7 @@ enum ToolDefinitions {
         ),
         AgentTool(
             name: .analyzeFootageQuality,
-            description: "Analyze video usability with on-device temporal metrics before choosing good takes or trimming bad footage. Returns per-window qualityScore, stability, clarity, sharpness, motion, jitter, visualChange, isUsable, and issues such as shaky, blurry, soft focus, static, or high motion. bestRanges only contains clear, non-shaky windows, so if the start is blurry but the later shot becomes clear, use the later clear range and do not place the blurry section on the timeline. This is the reliable signal for stable vs shaky footage, motion settling, focus/blur, and candidate usable ranges; inspect_media only shows sparse still frames.\n\nUse windowSeconds around 1.5–3 for take selection. Use startSeconds/endSeconds to zoom into a suspected range. Results are source seconds unless clipId is supplied; when clipId is set, frame ranges are mapped to project frames for that clip.",
+            description: "Analyze video usability with on-device temporal metrics before choosing good takes or trimming bad footage. Returns per-window qualityScore, stability, clarity, sharpness, motion, jitter, visualChange, exposure (underexposed/overexposed + meanLuma and shadow/highlight clipping), isUsable, and issues such as shaky, blurry, soft focus, static, high motion, underexposed, or overexposed. bestRanges only contains clear, non-shaky windows, so if the start is blurry but the later shot becomes clear, use the later clear range and do not place the blurry section on the timeline. This is the reliable signal for stable vs shaky footage, motion settling, focus/blur, and candidate usable ranges; inspect_media only shows sparse still frames.\n\nUse windowSeconds around 1.5–3 for take selection. Use startSeconds/endSeconds to zoom into a suspected range. Results are source seconds unless clipId is supplied; when clipId is set, frame ranges are mapped to project frames for that clip.",
             inputSchema: objectSchema(
                 properties: [
                     "mediaRef": ["type": "string", "description": "Video asset ID from get_media."],
@@ -738,6 +741,51 @@ enum ToolDefinitions {
                     "atFrame": ["type": "integer", "description": "Optional project frame to sample a clip. Defaults to the clip's midpoint. Ignored for mediaRef."],
                     "reference": ["type": "string", "description": "Optional image/video asset id from get_media to compare against; returns its scopes + the subject−reference gap."],
                 ]
+            )
+        ),
+        AgentTool(
+            name: .getReferenceGuidance,
+            description: "Returns editorial guidance for a known domain (currently malay_wedding) compiled from a reference dataset: per-moment importance (core/optional/filler), audioPolicy (feature-original/music-bed-ok/ambient), preferred/avoid shot qualities, and — when you pass ceremonyType — the canonical moment order to assemble the timeline. Call this BEFORE arranging domain footage so cuts follow the expected structure and crucial audio (akad vows, family salam) is kept. Pass momentType for one moment's rules, ceremonyType (e.g. nikah, tunang, reception) for the ordered timeline, or neither for an overview.",
+            inputSchema: objectSchema(
+                properties: [
+                    "domain": ["type": "string", "description": "Domain pack id. Default malay_wedding."],
+                    "ceremonyType": ["type": "string", "description": "Return the ordered moment timeline for this ceremony (e.g. nikah, tunang, reception)."],
+                    "momentType": ["type": "string", "description": "Return guidance for a single moment (e.g. akad_nikah)."],
+                ]
+            )
+        ),
+        AgentTool(
+            name: .classifyMoments,
+            description: "Prepares per-clip classification inputs for domain footage: for each video asset it returns a representative midpoint frame (as an image), the filename sequence hint, duration, and the candidate moment types with their cues. Use it to tag what each clip depicts before assembling — look at each frame, decide its momentType, then call tag_moments. Defaults to all video assets; pass mediaRefs to scope, or maxClips to page (max 24 per call). Escalate any clip you can't place with inspect_media.",
+            inputSchema: objectSchema(
+                properties: [
+                    "domain": ["type": "string", "description": "Domain pack id. Default malay_wedding."],
+                    "ceremonyType": ["type": "string", "description": "Restrict candidate moments to this ceremony's timeline."],
+                    "mediaRefs": ["type": "array", "items": ["type": "string"], "description": "Video asset ids to classify. Omit to use all video assets."],
+                    "maxClips": ["type": "integer", "description": "Max clips per call (default 16, max 24)."],
+                ]
+            )
+        ),
+        AgentTool(
+            name: .tagMoments,
+            description: "Stores moment classifications onto media assets so assembly and later sessions can use them. Tags persist with the project and appear in get_media. Call after classify_moments with your decided momentType per clip.",
+            inputSchema: objectSchema(
+                properties: [
+                    "tags": [
+                        "type": "array",
+                        "description": "Classifications to store.",
+                        "items": objectSchema(
+                            properties: [
+                                "mediaRef": ["type": "string", "description": "Video asset id from get_media."],
+                                "momentType": ["type": "string", "description": "Moment type from get_reference_guidance (e.g. akad_nikah)."],
+                                "ceremonyType": ["type": "string", "description": "Optional ceremony this clip belongs to."],
+                                "confidence": ["type": "number", "description": "0–1 confidence in the classification. Default 1."],
+                            ],
+                            required: ["mediaRef", "momentType"]
+                        ),
+                    ],
+                ],
+                required: ["tags"]
             )
         ),
     ]

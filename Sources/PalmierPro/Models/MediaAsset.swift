@@ -17,6 +17,7 @@ final class MediaAsset: Identifiable {
     var generationInput: GenerationInput?
     var generationStatus: GenerationStatus = .none
     var folderId: String?
+    var momentTag: MomentTag?
     var pendingDownloadURL: URL?
     var cachedRemoteURL: String?
     var cachedRemoteURLExpiresAt: Date?
@@ -69,6 +70,7 @@ final class MediaAsset: Identifiable {
         self.sourceFPS = entry.sourceFPS
         self.hasAudio = entry.hasAudio ?? false
         self.folderId = entry.folderId
+        self.momentTag = entry.momentTag
         self.cachedRemoteURL = entry.cachedRemoteURL
         self.cachedRemoteURLExpiresAt = entry.cachedRemoteURLExpiresAt
     }
@@ -90,6 +92,7 @@ final class MediaAsset: Identifiable {
             hasAudio: hasAudio, folderId: folderId,
             cachedRemoteURL: fresh,
             cachedRemoteURLExpiresAt: fresh == nil ? nil : cachedRemoteURLExpiresAt,
+            momentTag: momentTag,
         )
     }
 
