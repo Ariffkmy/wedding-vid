@@ -7,11 +7,14 @@ from pathlib import Path
 from collections import Counter
 
 # --- config ---
+YTDLP = "/Users/atiqahbaiduri/Library/Python/3.9/bin/yt-dlp"  # full path for macOS
+FFMPEG = "/Users/atiqahbaiduri/Library/Python/3.9/lib/python/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1"
+FFPROBE = FFMPEG  # ffmpeg probes on its own
 # Set OPENROUTER_API_KEY in your environment; never hardcode the key.
 OR_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 if not OR_KEY:
     sys.exit("Set OPENROUTER_API_KEY in your environment before running.")
-BASE = Path(r"C:\Users\AriffHakimiChik\video-editor")
+BASE = Path("/Users/atiqahbaiduri/video-editor")
 REF_DIR = BASE / "References" / "MalayWedding"
 JSONL_PATH = REF_DIR / "metadata" / "references_malay_wedding.jsonl"
 AI_TAX_PATH = BASE / "AI-reference" / "taxonomy_malay_wedding.json"
@@ -103,7 +106,7 @@ def detect_shots(video_path):
     """Detect shot boundaries. Returns list of (start_sec, end_sec)."""
     try:
         from scenedetect import detect, ContentDetector
-        scenes = detect(video_path, ContentDetector(threshold=42))
+        scenes = detect(str(video_path), ContentDetector(threshold=42))
         if not scenes:
             return []
         result = []
@@ -131,7 +134,7 @@ def fallback_sample_every_2s(duration):
 def extract_middle_frame(video_path, shot_start, shot_end, output_path):
     """Extract frame from the middle of a shot."""
     mid = (shot_start + shot_end) / 2
-    r = subprocess.run(["ffmpeg","-y","-ss",str(mid),"-i",str(video_path),"-vframes","1","-vf","scale=480:-1","-q:v","3",str(output_path)], capture_output=True, text=True, timeout=30)
+    r = subprocess.run([FFMPEG,"-y","-ss",str(mid),"-i",str(video_path),"-vframes","1","-vf","scale=480:-1","-q:v","3",str(output_path)], capture_output=True, text=True, timeout=30)
     return output_path.exists()
 
 def classify_batch(frames_batch, shot_indices, video_title):
@@ -145,8 +148,8 @@ def classify_batch(frames_batch, shot_indices, video_title):
         content.append({"type": "text", "text": f"[Shot {sidx}]:"})
         content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
     
-    payload = {"model": "google/gemini-2.5-flash-lite", "messages": [{"role": "user", "content": content}], "max_tokens": 3000, "temperature": 0.1}
-    req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers={"Content-Type":"application/json","Authorization":f"Bearer {OR_KEY}"}, method="POST")
+    payload = {"model": "google/gemini-2.5-flash-lite", "messages": [{"role": "user", "content": content}], "max_tokens": 1200, "temperature": 0.1}
+    req = urllib.request.Request(url, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"), headers={"Content-Type":"application/json; charset=utf-8","Authorization":f"Bearer {OR_KEY}"}, method="POST")
     
     for retry in range(3):
         try:
@@ -259,7 +262,7 @@ log("=== Shot-by-shot timeline labeling pipeline ===")
 
 # Step 1: Get list of videos to process
 log("1. Getting video list...")
-r = subprocess.run(["yt-dlp","--flat-playlist","--dump-json","--ignore-errors","--no-warnings","https://www.youtube.com/@blastphereventures4947/videos"], capture_output=True, text=True, timeout=120)
+r = subprocess.run([YTDLP,"--flat-playlist","--dump-json","--ignore-errors","--no-warnings","https://www.youtube.com/@blastphereventures4947/videos"], capture_output=True, text=True, timeout=120)
 all_vids = [json.loads(l) for l in r.stdout.strip().split("\n") if l.strip()]
 # Filter wedding (no BTS)
 wedding_vids = [v for v in all_vids if not any(w in (v.get("title") or "").lower() for w in ["bts", "behind the scene"]) and any(w in (v.get("title") or "").lower() for w in ["wedding","nikah","akad","kawin","solemnization","reception","pelamin","sanding"])]
@@ -285,7 +288,7 @@ for idx, v in enumerate(remaining):
         
         # Download to temp
         video_path = TEMP / f"{vid}.mp4"
-        dl = subprocess.run(["yt-dlp","-f","worstvideo+worstaudio","--merge-output-format","mp4","--no-warnings","--no-playlist","-o",str(video_path),f"https://youtube.com/watch?v={vid}"], capture_output=True, text=True, timeout=600)
+        dl = subprocess.run([YTDLP,"-f","best[height<=720]","--extractor-args","youtube:player_client=android","--no-warnings","--no-playlist","-o",str(video_path),f"https://youtube.com/watch?v={vid}"], capture_output=True, text=True, timeout=600)
         if not video_path.exists():
             log(f"   Download failed, skipping")
             done_vids.add(vid)
@@ -293,8 +296,10 @@ for idx, v in enumerate(remaining):
             continue
         
         # Get duration
-        probe = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",str(video_path)], capture_output=True, text=True, timeout=15)
-        duration = float(probe.stdout.strip() or 300)
+        probe = subprocess.run([FFMPEG,"-v","error","-show_entries","format=duration","-of","csv=p=0",str(video_path)], capture_output=True, text=True, timeout=15)
+        dur_str = probe.stdout.strip() or probe.stderr.strip()
+        try: duration = float(dur_str or 300)
+        except: duration = 300.0
         log(f"   Dur:{duration:.0f}s Size:{os.path.getsize(video_path)//1024}KB")
         
         # Detect shots
@@ -306,7 +311,7 @@ for idx, v in enumerate(remaining):
         log(f"   Shots detected: {len(shots)}")
         
         # Get detail metadata once
-        detail_r = subprocess.run(["yt-dlp","--dump-json","--ignore-errors","--no-warnings",f"https://youtube.com/watch?v={vid}"], capture_output=True, text=True, timeout=60)
+        detail_r = subprocess.run([YTDLP,"--dump-json","--ignore-errors","--no-warnings",f"https://youtube.com/watch?v={vid}"], capture_output=True, text=True, timeout=60)
         detail = {}
         if detail_r.stdout.strip():
             try: detail = json.loads(detail_r.stdout)

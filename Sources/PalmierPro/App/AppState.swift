@@ -22,6 +22,50 @@ final class AppState {
         }
         let service = MCPService(editorProvider: { [weak self] in
             self?.activeProject?.editorViewModel
+        }, openProject: { [weak self] path in
+            guard let self else { throw ToolError("App state unavailable") }
+            let url = URL(fileURLWithPath: path)
+            let project = try await self.openProjectAsync(at: url)
+            return project.editorViewModel
+        }, exportProject: { [weak self] editor, outputPath, formatStr, resolutionStr in
+            guard let self else { throw ToolError("App state unavailable") }
+            
+            let fmt: ExportFormat
+            switch formatStr.lowercased() {
+            case "h264": fmt = .h264
+            case "h265": fmt = .h265
+            case "prores": fmt = .prores
+            case "xml": fmt = .xml
+            default: throw ToolError("Unknown format '\(formatStr)'. Use h264, h265, prores, or xml.")
+            }
+            
+            let res: ExportResolution
+            switch resolutionStr.lowercased() {
+            case "720p": res = .r720p
+            case "1080p": res = .r1080p
+            case "2k": res = .r1440p
+            case "4k": res = .r4k
+            case "native": res = .native
+            default: throw ToolError("Unknown resolution '\(resolutionStr)'. Use 720p, 1080p, 2k, 4k, or native.")
+            }
+            
+            let outputURL = URL(fileURLWithPath: outputPath)
+            let resolver = MediaResolver(
+                manifest: { editor.mediaManifest },
+                projectURL: { editor.projectURL }
+            )
+            let exportService = ExportService()
+            await exportService.export(
+                timeline: editor.timeline,
+                resolver: resolver,
+                format: fmt,
+                resolution: res,
+                outputURL: outputURL
+            )
+            if let error = exportService.error {
+                throw ToolError(error)
+            }
+            return ToolExecutor.jsonString(["status": "completed", "outputPath": outputPath, "format": formatStr, "resolution": resolutionStr]) ?? "{}"
         })
         service.start()
         mcpService = service
@@ -151,7 +195,7 @@ final class AppState {
     }
 
     @discardableResult
-    private func openProjectAsync(at url: URL, register: Bool = true, options: ProjectOpenOptions = .init()) async throws -> VideoProject {
+    func openProjectAsync(at url: URL, register: Bool = true, options: ProjectOpenOptions = .init()) async throws -> VideoProject {
         let resolved = url.standardizedFileURL
         if let existing = showExistingProject(at: resolved, register: register, options: options) {
             return existing

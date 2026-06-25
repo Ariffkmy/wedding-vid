@@ -175,6 +175,7 @@ extension ToolExecutor {
         }
 
         let actionName = specs.count == 1 ? "Add Clip (Agent)" : "Add Clips (Agent)"
+        var musicSlowMood = false
         let (createdTracks, summaries) = try withUndoGroup(editor, actionName: actionName) { () -> ([String], [String]) in
             var createdTracks: [String] = []
             // IDs already attributed to the response so the post-batch side-effect
@@ -232,7 +233,20 @@ extension ToolExecutor {
                     throw ToolError("entries[\(i)]: failed to place clip on track \(trackIdx) at frame \(spec.startFrame)")
                 }
                 allAdded.append(contentsOf: ids)
-                let pairedNote = ids.count > 1 ? " (+linked audio \(ids[1]))" : ""
+                var pairedNote = ""
+                if ids.count > 1 {
+                    let pack = DomainPackStore.load("malay_wedding")
+                    let momentType = spec.asset.momentTag?.momentType
+                    let audioPolicy = momentType.flatMap { pack?.moment($0)?.audioPolicy } ?? "ambient"
+                    let linkedAudioId = ids[1]
+                    if audioPolicy != "feature-original" {
+                        editor.commitClipProperty(clipId: linkedAudioId) { $0.volume = 0 }
+                        pairedNote = " (+linked \(linkedAudioId), muted — \(audioPolicy))"
+                    } else {
+                        editor.commitClipProperty(clipId: linkedAudioId) { $0.volume = 1 }
+                        pairedNote = " (+linked \(linkedAudioId), \(momentType ?? "?") — \(audioPolicy))"
+                    }
+                }
                 var trimNote = ""
                 if let t = spec.trimStartFrame, t != 0 { trimNote += " trimStart \(t)" }
                 if let t = spec.trimEndFrame, t != 0 { trimNote += " trimEnd \(t)" }
@@ -251,12 +265,43 @@ extension ToolExecutor {
             editor.undoManager?.registerUndo(withTarget: editor) { vm in
                 vm.removeClips(ids: Set(addedIds))
             }
+            // Apply music fade in/out to audio-only clips (music tracks)
+            // and detect music mood for slow-motion auto-application.
+            var addedAudioIndex = 0
+            for spec in specs {
+                if spec.asset.type == .audio, addedAudioIndex < allAdded.count {
+                    let addedId = allAdded[addedAudioIndex]
+                    let fadeFrames = min(90, spec.durationFrames / 4)
+                    if spec.startFrame == 0 {
+                        editor.commitClipProperty(clipId: addedId) { $0.fadeInFrames = fadeFrames }
+                    }
+                    let endFrame = spec.startFrame + spec.durationFrames
+                    if endFrame >= editor.timeline.totalFrames - 30 {
+                        editor.commitClipProperty(clipId: addedId) { $0.fadeOutFrames = fadeFrames }
+                    }
+                    // Detect music mood: if slow/romantic, flag for slow-mo
+                    if !musicSlowMood {
+                        musicSlowMood = Self.musicIsSlow(spec.asset)
+                    }
+                    addedAudioIndex += 1
+                }
+            }
+            // If music is slow/romantic/melancholic, apply slow-motion to ALL video clips on the timeline
+            if musicSlowMood {
+                for track in editor.timeline.tracks where track.type == .video {
+                    for clip in track.clips {
+                        editor.commitClipProperty(clipId: clip.id) { $0.speed = 0.5 }
+                    }
+                }
+            }
+
             return (createdTracks, summaries)
         }
         editor.notifyTimelineChanged()
 
+        let slowMoNote = musicSlowMood ? " [auto slow-mo applied]" : ""
         let prefix = createdTracks.isEmpty ? "" : "Created \(createdTracks.joined(separator: ", ")). "
-        return .ok("\(prefix)Added \(specs.count) clip\(specs.count == 1 ? "" : "s"): \(summaries.joined(separator: "; "))")
+        return .ok("\(prefix)Added \(specs.count) clip\(specs.count == 1 ? "" : "s")\(slowMoNote): \(summaries.joined(separator: "; "))")
     }
 
     // MARK: insert_clips
@@ -830,5 +875,37 @@ extension ToolExecutor {
             throw ToolError("Failed to encode result")
         }
         return .ok(json)
+    }
+
+    // MARK: - Music mood detection
+
+    /// Synchronously estimates whether a music track is slow/romantic/melancholic
+    /// by analyzing its audio for BPM. Returns true if BPM ≤ 75 (slow).
+    private static func musicIsSlow(_ asset: MediaAsset) -> Bool {
+        let url = asset.url
+        final class BPMBox: @unchecked Sendable {
+            var isSlow = false
+            var bpm: Double = 0
+        }
+        let box = BPMBox()
+        let semaphore = DispatchSemaphore(value: 0)
+        Task.detached {
+            defer { semaphore.signal() }
+            let bgURL = url
+            do {
+                let analysis = try await BeatDetector.analyze(url: bgURL)
+                box.isSlow = analysis.bpm <= 75
+                box.bpm = analysis.bpm
+                await MainActor.run {
+                    Log.agent.notice("music-mood bpm=\(box.bpm) slow=\(box.isSlow)")
+                }
+            } catch {
+                await MainActor.run {
+                    Log.agent.warning("music-mood detect failed: \(error.localizedDescription)")
+                }
+            }
+        }
+        _ = semaphore.wait(timeout: .now() + 20)
+        return box.isSlow
     }
 }

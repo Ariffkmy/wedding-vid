@@ -66,6 +66,33 @@ extension ToolExecutor {
                 clip.effects = stack.isEmpty ? nil : stack
             }
         }
+        // Trigger async stabilization analysis if stabilize was applied
+        if adds.contains(where: { $0.type.hasPrefix("stabilize.") }) {
+            let clipIds = input.clipIds
+            Task {
+                for clipId in clipIds {
+                    guard let clip = await MainActor.run(body: { editor.clipFor(id: clipId) }) else { continue }
+                    guard let sourceURL = await MainActor.run(body: { editor.mediaAssets.first(where: { $0.id == clip.mediaRef })?.url }) else { continue }
+                    let cacheKey = "stab:\(sourceURL.path):\(clip.trimStartFrame)-\(clip.trimEndFrame)"
+                    if StabilizationCache.shared.get(key: cacheKey) == nil {
+                        if let data = await Stabilizer.analyze(clip: clip, sourceURL: sourceURL, fps: editor.timeline.fps) {
+                            StabilizationCache.shared.set(key: cacheKey, data: data)
+                        }
+                    }
+                    // Store the cacheKey on the effect so the CI closure can find it
+                    await MainActor.run {
+                        editor.mutateClips(ids: [clipId], actionName: "link stabilization") { clip in
+                            guard var effects = clip.effects else { return }
+                            if let idx = effects.firstIndex(where: { $0.type.hasPrefix("stabilize.") }) {
+                                effects[idx].params["cacheKey"] = EffectParam(string: cacheKey)
+                                clip.effects = effects
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         var summary: [String] = []
         if !adds.isEmpty { summary.append("set \(adds.map(\.type).joined(separator: ", "))") }
         if !removes.isEmpty { summary.append("removed \(removes.joined(separator: ", "))") }

@@ -28,7 +28,7 @@
   "audioPatterns": "traditional music during pelamin, silent/reverent during akad, upbeats for reception",
   "generated_at": "2026-06-24T01:41:47.673551",
   "avgDurationSec": 637.9628099173553,
-  "version": "1.3",
+  "version": "1.4",
   "momentCategories": {
     "scene": [
       "venue_establishing",
@@ -58,7 +58,13 @@
       "reception",
       "makan_beradab",
       "exit_or_closing"
-    ]
+    ],
+    "bride_entrance": "scene",
+    "editorial_transition": "scene",
+    "groom_entrance": "scene",
+    "bride_processional": "scene",
+    "new:_baby_moment": "scene",
+    "new_type": "scene"
   },
-  "totalShotRecords": 1663
+  "totalShotRecords": 7069
 }

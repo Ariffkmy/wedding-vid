@@ -116,7 +116,22 @@ extension ToolExecutor {
             pack?.moment(name).map { ["momentType": name, "cues": $0.classificationCues, "importance": $0.importance] }
         }
 
-        // Sample one representative (midpoint) frame per clip.
+        // Sample one representative (midpoint) frame per clip — all in parallel.
+        let frameResults: [(Int, Data?)] = await withTaskGroup(of: (Int, Data?).self) { group in
+            for (index, asset) in batch.enumerated() {
+                guard FileManager.default.fileExists(atPath: asset.url.path) else {
+                    continue
+                }
+                let url = asset.url
+                let duration = asset.duration
+                group.addTask { (index, await Self.sampleMidpointJPEG(url: url, duration: duration)) }
+            }
+            var results: [(Int, Data?)] = []
+            for await pair in group { results.append(pair) }
+            return results
+        }
+        let frameByIndex = Dictionary(uniqueKeysWithValues: frameResults.compactMap { idx, data in data.map { (idx, $0) } })
+
         var imageBlocks: [ToolResult.Block] = []
         var clipMeta: [[String: Any]] = []
         for (index, asset) in batch.enumerated() {
@@ -128,8 +143,7 @@ extension ToolExecutor {
                 "filenameSequenceHint": Self.filenameSequenceHint(asset.name),
             ]
             if let tag = asset.momentTag { meta["existingTag"] = tag.momentType }
-            if FileManager.default.fileExists(atPath: asset.url.path),
-               let jpeg = await Self.sampleMidpointJPEG(url: asset.url, duration: asset.duration) {
+            if let jpeg = frameByIndex[index] {
                 imageBlocks.append(.image(base64: jpeg.base64EncodedString(), mediaType: "image/jpeg"))
                 meta["frame"] = "image #\(imageBlocks.count)"
             } else {
@@ -142,7 +156,7 @@ extension ToolExecutor {
             "domain": domain,
             "clips": clipMeta,
             "candidateMoments": candidates,
-            "instructions": "Each clip's representative frame is the image at its 'frame' index, in order. Decide each clip's momentType from the frame + filenameSequenceHint + cues, then call tag_moments with the assignments. Use inspect_media on any clip you can't confidently place.",
+            "instructions": "Each clip's representative frame is the image at its 'frame' index, in order. Decide each clip's momentType from the frame + filenameSequenceHint + cues, then call tag_moments with the assignments. For uncertain clips, use your best guess from context — do NOT call inspect_media during bulk classification as it triggers expensive audio transcription.",
         ]
         if let ceremonyType { payload["ceremonyType"] = ceremonyType.lowercased() }
         if batch.count < videos.count {

@@ -1,0 +1,16 @@
+{
+  "domain": "malay_wedding",
+  "source": "Toi Films",
+  "moment_types": {
+    "bersiram": "scene",
+    "moment": "scene",
+    "groom_portrait": "scene"
+  },
+  "categories": [
+    "preparation",
+    "scene",
+    "family",
+    "ceremony",
+    "celebration"
+  ]
+}

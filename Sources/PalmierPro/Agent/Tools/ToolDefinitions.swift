@@ -42,6 +42,8 @@ enum ToolName: String, CaseIterable, Sendable {
     case getReferenceGuidance = "get_reference_guidance"
     case classifyMoments = "classify_moments"
     case tagMoments = "tag_moments"
+    case openProject = "open_project"
+    case exportProject = "export_project"
 }
 
 struct AgentTool: @unchecked Sendable {
@@ -786,6 +788,28 @@ enum ToolDefinitions {
                     ],
                 ],
                 required: ["tags"]
+            )
+        ),
+        AgentTool(
+            name: .openProject,
+            description: "Open a PalmierPro project by absolute file path. The project file is a directory bundle (e.g. '/Users/.../project.palmier'). After opening, the editor becomes available and all other tools can operate on the loaded project.",
+            inputSchema: objectSchema(
+                properties: [
+                    "path": ["type": "string", "description": "Absolute path to the .palmier project bundle."],
+                ],
+                required: ["path"]
+            )
+        ),
+        AgentTool(
+            name: .exportProject,
+            description: "Export the current timeline to a video file. Supports H.264 (mp4), H.265 (mp4), ProRes (mov), and XML (Final Cut Pro 7). Resolution options: 720p, 1080p, 2K, 4K, or native (match timeline). Returns the output file path on success. Export runs asynchronously — monitor progress via the returned status.",
+            inputSchema: objectSchema(
+                properties: [
+                    "outputPath": ["type": "string", "description": "Absolute path for the exported file (include extension)."],
+                    "format": ["type": "string", "description": "Export format: 'h264', 'h265', 'prores', or 'xml'. Default: 'h264'."],
+                    "resolution": ["type": "string", "description": "Export resolution: '720p', '1080p', '2K', '4K', or 'native'. Default: '1080p'."],
+                ],
+                required: ["outputPath"]
             )
         ),
     ]

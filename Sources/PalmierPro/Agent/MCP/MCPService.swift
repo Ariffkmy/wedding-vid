@@ -28,8 +28,8 @@ final class MCPService {
     @ObservationIgnored
     private var httpServer: MCPHTTPServer?
 
-    init(editorProvider: @escaping () -> EditorViewModel?) {
-        self.toolExecutor = ToolExecutor(editorProvider: editorProvider)
+    init(editorProvider: @escaping () -> EditorViewModel?, openProject: ((String) async throws -> EditorViewModel)? = nil, exportProject: ((EditorViewModel, String, String, String) async throws -> String)? = nil) {
+        self.toolExecutor = ToolExecutor(editorProvider: editorProvider, openProject: openProject, exportProject: exportProject)
     }
 
     func start() {

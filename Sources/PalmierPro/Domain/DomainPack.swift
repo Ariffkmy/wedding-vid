@@ -54,10 +54,13 @@ enum DomainPackStore {
     @MainActor
     static func load(_ domain: String) -> DomainPack? {
         if let hit = cache[domain] { return hit }
-        guard let root = Bundle.main.resourceURL else { return nil }
+        let root = Bundle.main.resourceURL ?? URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let devRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .deletingLastPathComponent()  // from .build/debug up to project dir
         let candidates = [
             root.appendingPathComponent("DomainPacks/\(domain).json"),
             root.appendingPathComponent("PalmierPro_PalmierPro.bundle/DomainPacks/\(domain).json"),
+            devRoot.appendingPathComponent("Sources/PalmierPro/Resources/DomainPacks/\(domain).json"),
         ]
         for url in candidates where FileManager.default.fileExists(atPath: url.path) {
             guard let data = try? Data(contentsOf: url),
