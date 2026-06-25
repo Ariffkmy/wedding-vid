@@ -76,6 +76,15 @@ extension EditorViewModel {
         notifyTimelineChanged()
     }
 
+    func applyLetterboxRatio(_ ratio: Double?) {
+        let prev = timeline.letterboxRatio
+        guard prev != ratio else { return }
+        timeline.letterboxRatio = ratio
+        undoManager?.registerUndo(withTarget: self) { vm in vm.applyLetterboxRatio(prev) }
+        undoManager?.setActionName(ratio == nil ? "Remove Letterbox" : "Apply Letterbox")
+        notifyTimelineChanged()
+    }
+
     func checkProjectSettings(for assets: [MediaAsset]) -> ProjectSettingsAction {
         guard let firstVideo = assets.first(where: { $0.type == .video }) else {
             return .proceed

@@ -95,6 +95,7 @@ struct InspectorView: View {
                     menuMetadataRow(label: "Resolution", value: "\(editor.timeline.width) × \(editor.timeline.height)") { qualityMenuItems }
                     menuMetadataRow(label: "Frame Rate", value: "\(editor.timeline.fps) fps") { fpsMenuItems }
                     menuMetadataRow(label: "Aspect Ratio", value: formatAspectRatio(width: editor.timeline.width, height: editor.timeline.height)) { aspectMenuItems }
+                    menuMetadataRow(label: "Letterbox", value: letterboxLabel) { letterboxMenuItems }
                 }
             }
             .padding(.horizontal, AppTheme.Spacing.lg)
@@ -227,6 +228,29 @@ struct InspectorView: View {
                     Text(preset.label)
                     Spacer()
                     if preset.matches(width: editor.timeline.width, height: editor.timeline.height) {
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+        }
+    }
+
+    private var letterboxLabel: String {
+        guard let ratio = editor.timeline.letterboxRatio else { return "None" }
+        return LetterboxPreset.allCases.first { $0.ratio == ratio }?.label
+            ?? String(format: "%.2f:1", ratio)
+    }
+
+    @ViewBuilder
+    private var letterboxMenuItems: some View {
+        ForEach(LetterboxPreset.allCases, id: \.self) { preset in
+            Button {
+                editor.applyLetterboxRatio(preset.ratio)
+            } label: {
+                HStack {
+                    Text(preset.label)
+                    Spacer()
+                    if editor.timeline.letterboxRatio == preset.ratio {
                         Image(systemName: "checkmark")
                     }
                 }

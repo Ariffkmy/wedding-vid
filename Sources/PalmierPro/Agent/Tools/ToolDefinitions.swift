@@ -45,6 +45,7 @@ enum ToolName: String, CaseIterable, Sendable {
     case classifyMoments = "classify_moments"
     case tagMoments = "tag_moments"
     case openProject = "open_project"
+    case setProjectSettings = "set_project_settings"
     case sendFeedback = "send_feedback"
 }
 
@@ -832,6 +833,18 @@ enum ToolDefinitions {
                     "path": ["type": "string", "description": "Absolute path to the .palmier project bundle."],
                 ],
                 required: ["path"]
+            )
+        ),
+        AgentTool(
+            name: .setProjectSettings,
+            description: "Change project-level settings in one undoable action. All fields are optional — omit any you don't want to change. fps changes rescale all clip timings proportionally. width/height must be provided together. letterboxRatio adds cinematic black bars on top of every frame during preview and export: pass a ratio like 2.35 for 2.35:1 widescreen, or 0 to remove bars.",
+            inputSchema: objectSchema(
+                properties: [
+                    "fps": ["type": "integer", "description": "Timeline frame rate (e.g. 24, 30, 60)."],
+                    "width": ["type": "integer", "description": "Canvas width in pixels. Must be provided with height."],
+                    "height": ["type": "integer", "description": "Canvas height in pixels. Must be provided with width."],
+                    "letterboxRatio": ["type": "number", "description": "Cinematic bar ratio as a decimal (e.g. 2.35 for 2.35:1). Pass 0 to remove bars."],
+                ]
             )
         ),
         AgentTool(

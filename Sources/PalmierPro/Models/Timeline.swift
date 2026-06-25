@@ -11,6 +11,7 @@ struct Timeline: Codable, Sendable, Equatable {
     var width: Int = 1920
     var height: Int = 1080
     var settingsConfigured: Bool = false
+    var letterboxRatio: Double? = nil
     var tracks: [Track] = []
 
     var totalFrames: Int {

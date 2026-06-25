@@ -21,12 +21,14 @@ final class CompositorInstruction: NSObject, AVVideoCompositionInstructionProtoc
     let layers: [LayerPlan]
     let renderSize: CGSize
     let fps: Int
+    let letterboxRatio: Double?
 
-    init(timeRange: CMTimeRange, layers: [LayerPlan], renderSize: CGSize, fps: Int) {
+    init(timeRange: CMTimeRange, layers: [LayerPlan], renderSize: CGSize, fps: Int, letterboxRatio: Double? = nil) {
         self.timeRange = timeRange
         self.layers = layers
         self.renderSize = renderSize
         self.fps = fps
+        self.letterboxRatio = letterboxRatio
         var seen = Set<CMPersistentTrackID>()
         self.requiredSourceTrackIDs = layers.compactMap {
             seen.insert($0.trackID).inserted ? NSNumber(value: $0.trackID) : nil

@@ -23,6 +23,26 @@ enum FrameRenderer {
                 accum = image.composited(over: accum)
             }
         }
+        if let ratio = instruction.letterboxRatio, ratio > 0 {
+            let canvasAspect = renderRect.width / renderRect.height
+            if ratio > canvasAspect {
+                // Letterbox: horizontal bars top and bottom
+                let barH = max(0, (renderRect.height - renderRect.width / ratio) / 2)
+                let black = CIImage(color: .black)
+                let bottom = black.cropped(to: CGRect(x: 0, y: 0, width: renderRect.width, height: barH))
+                let top = black.cropped(to: CGRect(x: 0, y: renderRect.height - barH, width: renderRect.width, height: barH))
+                accum = bottom.composited(over: accum)
+                accum = top.composited(over: accum)
+            } else if ratio < canvasAspect {
+                // Pillarbox: vertical bars left and right
+                let barW = max(0, (renderRect.width - renderRect.height * ratio) / 2)
+                let black = CIImage(color: .black)
+                let left = black.cropped(to: CGRect(x: 0, y: 0, width: barW, height: renderRect.height))
+                let right = black.cropped(to: CGRect(x: renderRect.width - barW, y: 0, width: barW, height: renderRect.height))
+                accum = left.composited(over: accum)
+                accum = right.composited(over: accum)
+            }
+        }
         context.render(accum, to: output, bounds: renderRect, colorSpace: nil)
         tag709(output)
     }

@@ -37,6 +37,30 @@ enum AspectPreset: CaseIterable {
     }
 }
 
+enum LetterboxPreset: CaseIterable {
+    case none, r1_85, r2_35, r2_39, r2_40
+
+    var label: String {
+        switch self {
+        case .none:  "None"
+        case .r1_85: "1.85:1"
+        case .r2_35: "2.35:1"
+        case .r2_39: "2.39:1"
+        case .r2_40: "2.40:1"
+        }
+    }
+
+    var ratio: Double? {
+        switch self {
+        case .none:  nil
+        case .r1_85: 1.85
+        case .r2_35: 2.35
+        case .r2_39: 2.39
+        case .r2_40: 2.40
+        }
+    }
+}
+
 enum QualityPreset: CaseIterable {
     case hd720, fullHD, twoK, fourK
 

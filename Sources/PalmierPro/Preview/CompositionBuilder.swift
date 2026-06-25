@@ -480,7 +480,8 @@ enum CompositionBuilder {
                 .filter { $0.start <= range.start && $0.end >= range.end }
                 .map(\.plan)
             instructions.append(CompositorInstruction(
-                timeRange: range, layers: layers, renderSize: renderSize, fps: timeline.fps
+                timeRange: range, layers: layers, renderSize: renderSize, fps: timeline.fps,
+                letterboxRatio: timeline.letterboxRatio
             ))
         }
         return instructions
