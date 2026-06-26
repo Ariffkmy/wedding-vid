@@ -60,7 +60,9 @@ struct PalmierClient: AgentClient {
             throw PalmierClientError.from(status: http.statusCode, body: body)
         }
 
-        try await AnthropicSSE.parse(bytes: bytes, continuation: continuation)
+        try await AnthropicSSE.parse(
+            bytes: bytes, model: model.rawValue, provider: .anthropic, continuation: continuation
+        )
     }
 }
 

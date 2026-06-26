@@ -16,6 +16,18 @@ enum AnthropicModel: String, CaseIterable, Sendable {
     }
 }
 
+enum AgentProviderMode: String, CaseIterable, Sendable {
+    case defaultSetting
+    case claudeOwnKey
+
+    var displayName: String {
+        switch self {
+        case .defaultSetting: "Default Setting"
+        case .claudeOwnKey: "Claude (Your own API key)"
+        }
+    }
+}
+
 enum AnthropicStopReason: String, Sendable {
     case endTurn = "end_turn"
     case toolUse = "tool_use"
@@ -38,10 +50,28 @@ struct AnthropicToolSchema: @unchecked Sendable {
     let inputSchema: [String: Any]
 }
 
+enum AgentProvider: String, Sendable {
+    case anthropic
+    case openAICompatible
+}
+
+/// Normalized per-request token counts. Counts are additive (no overlap):
+/// `inputTokens` is uncached prompt, cache reads/writes are separate, output is generated.
+struct AgentTokenUsage: Sendable, Equatable {
+    var inputTokens: Int = 0
+    var outputTokens: Int = 0
+    var cacheReadTokens: Int = 0
+    var cacheWriteTokens: Int = 0
+
+    var totalTokens: Int { inputTokens + outputTokens + cacheReadTokens + cacheWriteTokens }
+    var isEmpty: Bool { totalTokens == 0 }
+}
+
 enum AnthropicStreamEvent: Sendable {
     case textDelta(String)
     case toolUseComplete(id: String, name: String, inputJSON: String)
     case messageStop(stopReason: AnthropicStopReason)
+    case usage(model: String, provider: AgentProvider, usage: AgentTokenUsage)
 }
 
 enum AnthropicClientError: LocalizedError {
@@ -68,29 +98,23 @@ protocol AgentClient: Sendable {
     ) -> AsyncThrowingStream<AnthropicStreamEvent, Error>
 }
 
-// MARK: - Usage logging
-
-enum AgentUsageLog {
-    static func record(_ usage: [String: Any]) {
-        #if DEBUG
-        let input = usage["input_tokens"] as? Int ?? 0
-        let cacheWrite = usage["cache_creation_input_tokens"] as? Int ?? 0
-        let cacheRead = usage["cache_read_input_tokens"] as? Int ?? 0
-        let billed = input + cacheWrite + cacheRead
-        let readPct = billed > 0 ? Int((Double(cacheRead) / Double(billed)) * 100) : 0
-        print("[agent cache] input=\(input) cacheWrite=\(cacheWrite) cacheRead=\(cacheRead) (\(readPct)% read)")
-        #endif
-    }
-}
-
 // MARK: - Shared SSE parser
 
 enum AnthropicSSE {
     static func parse(
         bytes: URLSession.AsyncBytes,
+        model: String,
+        provider: AgentProvider,
         continuation: AsyncThrowingStream<AnthropicStreamEvent, Error>.Continuation
     ) async throws {
         var pendingTools: [Int: (id: String, name: String, json: String)] = [:]
+        var usage = AgentTokenUsage()
+        defer {
+            Log.agent.notice("anthropic stream end model=\(model) usage in=\(usage.inputTokens) out=\(usage.outputTokens) cacheR=\(usage.cacheReadTokens) cacheW=\(usage.cacheWriteTokens)")
+            if !usage.isEmpty {
+                continuation.yield(.usage(model: model, provider: provider, usage: usage))
+            }
+        }
         for try await line in bytes.lines {
             try Task.checkCancellation()
             guard line.hasPrefix("data:"),
@@ -101,8 +125,11 @@ enum AnthropicSSE {
             switch type {
             case "message_start":
                 if let message = event["message"] as? [String: Any],
-                   let usage = message["usage"] as? [String: Any] {
-                    AgentUsageLog.record(usage)
+                   let u = message["usage"] as? [String: Any] {
+                    usage.inputTokens = u["input_tokens"] as? Int ?? 0
+                    usage.cacheWriteTokens = u["cache_creation_input_tokens"] as? Int ?? 0
+                    usage.cacheReadTokens = u["cache_read_input_tokens"] as? Int ?? 0
+                    usage.outputTokens = u["output_tokens"] as? Int ?? 0
                 }
 
             case "content_block_start":
@@ -134,6 +161,10 @@ enum AnthropicSSE {
                 }
 
             case "message_delta":
+                if let u = event["usage"] as? [String: Any],
+                   let output = u["output_tokens"] as? Int {
+                    usage.outputTokens = output
+                }
                 if let delta = event["delta"] as? [String: Any],
                    let raw = delta["stop_reason"] as? String {
                     continuation.yield(.messageStop(stopReason: AnthropicStopReason(rawValue: raw) ?? .other))

@@ -6,10 +6,29 @@ public enum AgentStopReason: String, Sendable, Equatable {
     case endTurn, toolUse, maxTokens, refusal, other
 }
 
+public struct AgentUsage: Sendable, Equatable {
+    public var inputTokens: Int
+    public var outputTokens: Int
+    public var cacheReadTokens: Int
+    public var cacheWriteTokens: Int
+    public init(
+        inputTokens: Int = 0,
+        outputTokens: Int = 0,
+        cacheReadTokens: Int = 0,
+        cacheWriteTokens: Int = 0
+    ) {
+        self.inputTokens = inputTokens
+        self.outputTokens = outputTokens
+        self.cacheReadTokens = cacheReadTokens
+        self.cacheWriteTokens = cacheWriteTokens
+    }
+}
+
 public enum AgentStreamEvent: Sendable, Equatable {
     case text(String)
     case toolCall(id: String, name: String, argumentsJSON: String)
     case stop(AgentStopReason)
+    case usage(AgentUsage)
 }
 
 public struct AgentToolSchema {
@@ -223,9 +242,17 @@ public struct OpenAISSEDecoder {
         if let err = event["error"] as? [String: Any] {
             throw OpenAITranslationError.stream(err["message"] as? String ?? "Unknown stream error")
         }
-        guard let choice = (event["choices"] as? [[String: Any]])?.first else { return [] }
 
         var events: [AgentStreamEvent] = []
+
+        // Usage arrives in its own chunk (often with an empty `choices`) when
+        // `stream_options.include_usage` is set, so parse it before the choice guard.
+        if let usage = event["usage"] as? [String: Any] {
+            events.append(.usage(Self.parseUsage(usage)))
+        }
+
+        guard let choice = (event["choices"] as? [[String: Any]])?.first else { return events }
+
         if let delta = choice["delta"] as? [String: Any] {
             if let text = delta["content"] as? String, !text.isEmpty {
                 events.append(.text(text))
@@ -261,6 +288,21 @@ public struct OpenAISSEDecoder {
             events.append(.stop(Self.stopReason(reason)))
         }
         return events
+    }
+
+    /// OpenAI reports `prompt_tokens` inclusive of cached tokens; normalize so
+    /// `inputTokens` is the uncached prompt and cache reads are split out, matching
+    /// the Anthropic shape. OpenAI has no cache-creation counter.
+    static func parseUsage(_ usage: [String: Any]) -> AgentUsage {
+        let prompt = usage["prompt_tokens"] as? Int ?? 0
+        let completion = usage["completion_tokens"] as? Int ?? 0
+        let cachedRead = (usage["prompt_tokens_details"] as? [String: Any])?["cached_tokens"] as? Int ?? 0
+        return AgentUsage(
+            inputTokens: max(0, prompt - cachedRead),
+            outputTokens: completion,
+            cacheReadTokens: cachedRead,
+            cacheWriteTokens: 0
+        )
     }
 
     public static func stopReason(_ raw: String) -> AgentStopReason {

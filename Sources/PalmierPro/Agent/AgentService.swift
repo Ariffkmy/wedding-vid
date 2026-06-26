@@ -54,22 +54,25 @@ final class AgentService {
     var hasApiKey: Bool { !apiKey.isEmpty }
     var hasOpenRouterKey: Bool { !openRouterKey.isEmpty }
 
-    /// OpenRouter takes precedence over Anthropic/Palmier when its key is set (see `selectClient`).
-    var usesOpenRouter: Bool { hasOpenRouterKey }
-
-    var openRouterModel: String = {
-        UserDefaults.standard.string(forKey: OpenAICompatibleConfig.modelDefaultsKey)
-            ?? OpenAICompatibleConfig.defaultModel
+    var providerMode: AgentProviderMode = {
+        if let raw = UserDefaults.standard.string(forKey: "agentProviderMode"),
+           let mode = AgentProviderMode(rawValue: raw) {
+            return mode
+        }
+        return .defaultSetting
     }() {
-        didSet { UserDefaults.standard.set(openRouterModel, forKey: OpenAICompatibleConfig.modelDefaultsKey) }
+        didSet { UserDefaults.standard.set(providerMode.rawValue, forKey: "agentProviderMode") }
     }
 
-    var openRouterModelDisplayName: String { OpenAICompatibleConfig.displayName(forModel: openRouterModel) }
-
     var canStream: Bool {
-        if hasOpenRouterKey || hasApiKey { return true }
-        let account = AccountService.shared
-        return account.isSignedIn && account.hasCredits
+        switch providerMode {
+        case .claudeOwnKey:
+            return hasApiKey
+        case .defaultSetting:
+            if hasOpenRouterKey { return true }
+            let account = AccountService.shared
+            return account.isSignedIn && account.hasCredits
+        }
     }
 
     var availableModels: [AnthropicModel] {
@@ -78,15 +81,20 @@ final class AgentService {
     }
 
     private func selectClient() -> (any AgentClient)? {
-        if let config = OpenAICompatibleConfig.resolved() {
-            return OpenAICompatibleClient(config: config)
-        }
         let chosen = effectiveModel
-        if hasApiKey { return AnthropicClient(apiKey: apiKey, model: chosen) }
-        if AccountService.shared.isSignedIn {
-            return PalmierClient(model: chosen)
+        switch providerMode {
+        case .claudeOwnKey:
+            guard hasApiKey else { return nil }
+            return AnthropicClient(apiKey: apiKey, model: chosen)
+        case .defaultSetting:
+            if let config = OpenAICompatibleConfig.resolved() {
+                return OpenAICompatibleClient(config: config)
+            }
+            if AccountService.shared.isSignedIn {
+                return PalmierClient(model: chosen)
+            }
+            return nil
         }
-        return nil
     }
 
     var effectiveModel: AnthropicModel {
@@ -401,6 +409,8 @@ final class AgentService {
                         appendToolUse(id: id, name: name, inputJSON: inputJSON, toAssistant: assistantID)
                     case .messageStop(let reason):
                         stopReason = reason
+                    case .usage(let model, let provider, let usage):
+                        TokenUsageTracker.shared.record(model: model, provider: provider, usage: usage)
                     }
                 }
 

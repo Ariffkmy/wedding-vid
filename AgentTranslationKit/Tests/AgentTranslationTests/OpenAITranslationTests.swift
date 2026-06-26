@@ -248,6 +248,22 @@ final class OpenAITranslationTests: XCTestCase {
         ])
     }
 
+    func testUsageChunkIsDecodedAndCacheSplitOut() throws {
+        var decoder = OpenAISSEDecoder()
+        var events: [AgentStreamEvent] = []
+        events += try decoder.consume(line: #"data: {"choices":[{"delta":{"content":"hi"}}]}"#)
+        events += try decoder.consume(line: #"data: {"choices":[{"delta":{},"finish_reason":"stop"}]}"#)
+        // Final usage-only chunk (empty choices) with cached prompt tokens.
+        events += try decoder.consume(line: #"data: {"choices":[],"usage":{"prompt_tokens":100,"completion_tokens":20,"total_tokens":120,"prompt_tokens_details":{"cached_tokens":80}}}"#)
+
+        XCTAssertEqual(events, [
+            .text("hi"),
+            .stop(.endTurn),
+            // prompt_tokens (100) is inclusive of cached (80); input is the 20 uncached.
+            .usage(AgentUsage(inputTokens: 20, outputTokens: 20, cacheReadTokens: 80, cacheWriteTokens: 0)),
+        ])
+    }
+
     func testParallelToolCallsFlushSortedByIndex() throws {
         var decoder = OpenAISSEDecoder()
         var events: [AgentStreamEvent] = []
