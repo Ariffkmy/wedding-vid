@@ -24,9 +24,19 @@ jobs:
       - name: Cache SwiftPM
         uses: actions/cache@v4
         with:
-          path: .build
-          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
-          restore-keys: spm-${{ runner.os }}-
+          # Never cache .build/artifacts: binary targets (Sparkle xcframework) must
+          # be re-fetched/extracted each run, else a stale cache breaks the build.
+          path: |
+            .build
+            !.build/artifacts
+          key: spm-v2-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: spm-v2-${{ runner.os }}-
+
+      - name: Resolve dependencies
+        # Drop any restored binary artifacts so Sparkle's xcframework is re-extracted.
+        run: |
+          rm -rf .build/artifacts
+          swift package resolve
 
       - name: Build
         run: swift build
