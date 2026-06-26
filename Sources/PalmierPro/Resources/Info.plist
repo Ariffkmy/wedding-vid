@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Palmier Pro</string>
+	<string>Kawenreel</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -28,7 +28,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>io.palmier.pro</string>
 	<key>CFBundleName</key>
-	<string>Palmier Pro</string>
+	<string>Kawenreel</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
