@@ -24,6 +24,7 @@ enum ToolName: String, CaseIterable, Sendable {
     case generateAudio = "generate_audio"
     case upscaleMedia = "upscale_media"
     case importMedia = "import_media"
+    case importGDriveFolder = "import_gdrive_folder"
     case listModels = "list_models"
     case inspectMedia = "inspect_media"
     case analyzeFootageQuality = "analyze_footage_quality"
@@ -869,6 +870,17 @@ enum ToolDefinitions {
                     "severity": ["type": "string", "enum": ["low", "medium", "high"], "description": "Optional. How much this blocked the user."],
                 ],
                 required: ["category", "summary"]
+            )
+        ),
+        AgentTool(
+            name: .importGDriveFolder,
+            description: "Lists and downloads all media files from a Google Drive shared folder into the current project's media library. Pass the full folder URL. Files appear in get_media after downloading.",
+            inputSchema: objectSchema(
+                properties: [
+                    "folderUrl": ["type": "string", "description": "Full Google Drive folder URL (e.g. https://drive.google.com/drive/folders/ABC123)"],
+                    "folderId": ["type": "string", "description": "Optional. Destination media folder id (from list_folders). Omit for project root."],
+                ],
+                required: ["folderUrl"]
             )
         ),
     ]

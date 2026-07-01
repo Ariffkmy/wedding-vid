@@ -34,6 +34,13 @@ struct MediaTab: View {
 
     @State private var mediaPanelHeight: CGFloat = 600
 
+    // GDrive import state
+    @State private var showGDriveSheet = false
+    @State private var gdriveLink = ""
+    @State private var gdriveImporting = false
+    @State private var gdriveProgress: String = ""
+    @State private var gdriveFiles: [GDriveFileEntry] = []
+
     enum ViewMode: String, CaseIterable {
         case folder, flat, grouped
 
@@ -152,6 +159,9 @@ struct MediaTab: View {
         }
         .onChange(of: currentFolderId, initial: true) { _, folderId in
             editor.mediaPanelCurrentFolderId = folderId
+        }
+        .sheet(isPresented: $showGDriveSheet) {
+            gdriveImportSheet
         }
     }
 
@@ -274,6 +284,8 @@ struct MediaTab: View {
             }
 
             overflowMenu
+
+            toolbarButton(title: "GDrive", systemImage: "cloud", action: { showGDriveSheet = true })
 
             Spacer(minLength: 0)
 
@@ -761,6 +773,190 @@ struct MediaTab: View {
             Task { @MainActor in
                 await Self.handlePanelFinderDrop(urls: urls, into: folderId, editor: editor)
             }
+        }
+    }
+
+    // MARK: - GDrive Import
+
+    private var gdriveImportSheet: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Image(systemName: "cloud")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.secondary)
+                Text("Import from Google Drive")
+                    .font(.system(size: 16, weight: .semibold))
+                Spacer()
+                Button(action: { showGDriveSheet = false }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 4)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("1. Share your folder with this account:")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Text("kawenreel-gdrive@kawenreel-editor.iam.gserviceaccount.com")
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(
+                            "kawenreel-gdrive@kawenreel-editor.iam.gserviceaccount.com",
+                            forType: .string
+                        )
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 11))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy service account email")
+                }
+                .padding(8)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(6)
+
+                Text("2. Paste your Google Drive folder link:")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                TextField("Paste Google Drive folder link", text: $gdriveLink)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 13))
+                    .disabled(gdriveImporting)
+            }
+
+            if !gdriveProgress.isEmpty {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text(gdriveProgress)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 4)
+            }
+
+            if !gdriveFiles.isEmpty {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(gdriveFiles.count) file(s) found")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                        ForEach(gdriveFiles, id: \.id) { file in
+                            HStack(spacing: 6) {
+                                Image(systemName: fileIcon(for: file.mimeType))
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.secondary)
+                                Text(file.name)
+                                    .font(.system(size: 11))
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Spacer()
+                                Text(formatFileSize(Int64(file.size)))
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                }
+                .frame(maxHeight: 200)
+            }
+
+            HStack(spacing: 12) {
+                Button(action: listGDriveFolder) {
+                    Text("List Files")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(gdriveLink.trimmingCharacters(in: .whitespaces).isEmpty || gdriveImporting)
+
+                if !gdriveFiles.isEmpty {
+                    Button(action: downloadGDriveFiles) {
+                        Text("Download All (\(gdriveFiles.count))")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(gdriveImporting)
+                }
+
+                Spacer()
+            }
+        }
+        .padding(20)
+        .frame(width: 460)
+    }
+
+    private func fileIcon(for mimeType: String) -> String {
+        let lower = mimeType.lowercased()
+        if lower.hasPrefix("video/") { return "film" }
+        if lower.hasPrefix("audio/") { return "waveform" }
+        if lower.hasPrefix("image/") { return "photo" }
+        return "doc"
+    }
+
+    private func formatFileSize(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
+    }
+
+    private func listGDriveFolder() {
+        let link = gdriveLink.trimmingCharacters(in: .whitespaces)
+        guard !link.isEmpty else { return }
+
+        gdriveImporting = true
+        gdriveProgress = "Listing folder..."
+        gdriveFiles = []
+
+        Task { @MainActor in
+            do {
+                let files = try await GoogleDriveImporter.shared.listFolder(link)
+                gdriveFiles = files
+                gdriveProgress = "Found \(files.count) media file(s)"
+            } catch {
+                gdriveProgress = "Error: \(error.localizedDescription)"
+            }
+            gdriveImporting = false
+        }
+    }
+
+    private func downloadGDriveFiles() {
+        guard !gdriveFiles.isEmpty else { return }
+
+        gdriveImporting = true
+        gdriveProgress = "Starting download..."
+
+        let folderId = currentFolderId
+        let files = gdriveFiles
+
+        Task { @MainActor in
+            do {
+                let count = try await GoogleDriveImporter.shared.importIntoProject(
+                    editor: editor,
+                    entries: files,
+                    folderId: folderId,
+                    progressHandler: { msg in
+                        gdriveProgress = msg
+                    }
+                )
+                gdriveProgress = "Imported \(count) file(s)"
+                if count > 0 {
+                    editor.mediaPanelToast = MediaPanelToast(message: "Imported \(count) file(s) from Google Drive", kind: .success)
+                }
+            } catch {
+                gdriveProgress = "Import failed"
+                editor.mediaPanelToast = MediaPanelToast(message: error.localizedDescription, kind: .warning)
+            }
+            gdriveImporting = false
         }
     }
 }

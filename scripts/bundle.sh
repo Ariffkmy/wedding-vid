@@ -165,14 +165,6 @@ codesign --force --options runtime --timestamp \
   --sign "$SIGNING_IDENTITY" \
   "$APP/Contents/Frameworks/Sparkle.framework"
 
-echo "==> Embedding provisioning profile + keychain access group"
-if [ ! -f "$PROVISION_PROFILE" ]; then
-  echo "!! provisioning profile not found at $PROVISION_PROFILE" >&2
-  exit 1
-fi
-cp "$PROVISION_PROFILE" "$APP/Contents/embedded.provisionprofile"
-inject_plist PalmierClerkKeychainAccessGroup "$KEYCHAIN_ACCESS_GROUP"
-
 echo "==> Codesigning main app"
 codesign --force --options runtime --timestamp \
   --entitlements "$ENTITLEMENTS" \

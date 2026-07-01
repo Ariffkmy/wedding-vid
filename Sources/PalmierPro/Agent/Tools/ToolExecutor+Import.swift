@@ -211,7 +211,7 @@ extension ToolExecutor {
         }
     }
 
-    private static func fileExtension(forMime mime: String) -> String? {
+    nonisolated static func fileExtension(forMime mime: String) -> String? {
         switch mime.lowercased() {
         case "video/mp4", "video/mpeg4": return "mp4"
         case "video/quicktime": return "mov"
@@ -225,6 +225,7 @@ extension ToolExecutor {
         case "image/png": return "png"
         case "image/jpeg", "image/jpg": return "jpg"
         case "image/tiff": return "tiff"
+        case "image/webp": return "webp"
         case "image/heic", "image/heif": return "heic"
         case "application/json", "application/vnd.lottie+json": return "json"
         default: return nil
@@ -234,7 +235,7 @@ extension ToolExecutor {
 
 /// Caps the in-flight download size by cancelling the task once the byte threshold is crossed.
 /// `download(for:delegate:)` still finalizes the temp file on success.
-fileprivate final class ImportDownloadDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+final class ImportDownloadDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
     let maxBytes: Int64
     init(maxBytes: Int64) { self.maxBytes = maxBytes }
 
@@ -256,5 +257,34 @@ fileprivate final class ImportDownloadDelegate: NSObject, URLSessionDownloadDele
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         // No-op: the async download(for:delegate:) API copies the temp file for us.
+    }
+}
+
+extension ToolExecutor {
+    func importGDriveFolder(_ editor: EditorViewModel, _ args: [String: Any]) async throws -> ToolResult {
+        let allowedKeys: Set<String> = ["folderUrl", "folderId"]
+        try validateUnknownKeys(args, allowed: allowedKeys, path: "import_gdrive_folder")
+
+        guard let folderUrl = args.string("folderUrl"), !folderUrl.isEmpty else {
+            throw ToolError("Missing required 'folderUrl'")
+        }
+
+        let folderId = args.string("folderId")
+
+        // Call the shared importer to list files.
+        let entries = try await GoogleDriveImporter.shared.listFolder(folderUrl)
+
+        guard !entries.isEmpty else {
+            return .ok("No supported media files found in the shared folder.")
+        }
+
+        // Download and import.
+        let count = try await GoogleDriveImporter.shared.importIntoProject(
+            editor: editor,
+            entries: entries,
+            folderId: folderId
+        )
+
+        return .ok("Imported \(count) of \(entries.count) media files from Google Drive.")
     }
 }

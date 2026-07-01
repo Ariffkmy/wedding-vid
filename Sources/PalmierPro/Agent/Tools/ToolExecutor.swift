@@ -109,6 +109,7 @@ final class ToolExecutor {
         case .generateAudio: return try await generateAudio(editor, args)
         case .upscaleMedia:  return try upscaleMedia(editor, args)
         case .importMedia:   return try await importMedia(editor, args)
+        case .importGDriveFolder: return try await importGDriveFolder(editor, args)
         case .listModels:    return listModels(args)
         case .analyzeAudioBeats: return try await analyzeAudioBeats(editor, args)
         case .getReferenceGuidance: return try getReferenceGuidance(args)

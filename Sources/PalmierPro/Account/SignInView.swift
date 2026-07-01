@@ -107,7 +107,9 @@ final class SignInWindowController: NSWindowController {
         let hosting = NSHostingController(rootView: SignInView().tint(AppTheme.Accent.primary))
         let window = NSWindow(contentViewController: hosting)
         window.title = "Sign In"
-        window.styleMask = [.titled, .closable, .fullSizeContentView]
+        // No .closable: the gate can't be dismissed while signed out.
+        window.styleMask = [.titled, .fullSizeContentView]
+        window.isReleasedWhenClosed = false
         window.appearance = NSAppearance(named: .darkAqua)
         window.backgroundColor = AppTheme.Background.base.withAlphaComponent(0.4)
         window.isOpaque = false
@@ -137,9 +139,14 @@ enum AuthCoordinator {
             HomeWindowController.shared.showWindow(nil)
             NSApp.activate(ignoringOtherApps: true)
         } else {
-            HomeWindowController.shared.close()
+            // Signed out: show the gate and close every other window so no
+            // feature surface (home, editors, settings) remains reachable.
             SignInWindowController.shared.showWindow(nil)
-            SignInWindowController.shared.window?.makeKeyAndOrderFront(nil)
+            let gate = SignInWindowController.shared.window
+            for window in NSApp.windows where window !== gate {
+                window.close()
+            }
+            gate?.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
         }
     }

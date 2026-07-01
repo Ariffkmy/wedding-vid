@@ -46,7 +46,19 @@ final class AppState {
         }
     }
 
+    /// Every feature requires a signed-in user. When signed out, surface the
+    /// sign-in window instead of performing the action.
+    @discardableResult
+    func requireSignIn() -> Bool {
+        if SupabaseService.shared.isSignedIn { return true }
+        SignInWindowController.shared.showWindow(nil)
+        SignInWindowController.shared.window?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        return false
+    }
+
     func showHome() {
+        guard requireSignIn() else { return }
         guard let project = activeProject else {
             HomeWindowController.shared.showWindow(nil)
             return
@@ -126,6 +138,7 @@ final class AppState {
     // MARK: - Project lifecycle
 
     func createNewProject() {
+        guard requireSignIn() else { return }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [Self.projectContentType]
         panel.nameFieldStringValue = Project.defaultProjectName
@@ -146,6 +159,7 @@ final class AppState {
     }
 
     func openProject(at url: URL, register: Bool = true, options: ProjectOpenOptions = .init()) {
+        guard requireSignIn() else { return }
         Task {
             do {
                 try await openProjectAsync(at: url, register: register, options: options)
@@ -193,6 +207,7 @@ final class AppState {
     }
 
     func openSample(slug: String, startTutorial: Bool, onProgress: @escaping (Double) -> Void = { _ in }) async throws {
+        guard requireSignIn() else { return }
         let options = ProjectOpenOptions(startTutorial: startTutorial)
         if let cached = SampleProjectService.shared.cachedURL(slug: slug) {
             try await openProjectAsync(at: cached, register: false, options: options)
@@ -203,6 +218,7 @@ final class AppState {
     }
 
     func openProjectFromPanel() {
+        guard requireSignIn() else { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [Self.projectContentType]
         panel.canChooseDirectories = false

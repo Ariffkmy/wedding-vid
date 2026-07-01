@@ -11,6 +11,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Gate the app behind Supabase sign-in; routes to Home once authenticated.
         AuthCoordinator.start()
+
+        // Warn when connectivity drops; AI/online features require internet.
+        NetworkMonitor.shared.start()
         Task.detached(priority: .utility) {
             Project.ensureStorageDirectory()
         }
