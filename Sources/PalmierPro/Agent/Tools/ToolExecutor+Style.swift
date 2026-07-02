@@ -94,14 +94,44 @@ extension ToolExecutor {
         let projectRefs = editor.mediaAssets.filter { $0.isStyleReference && $0.type == .video }
         let projectProfiles = projectRefs.compactMap { store.assetProfile(url: $0.url) }
         let globalProfiles = store.globalReferences.compactMap { store.globalProfile(id: $0.id) }
+        let colorProfile = DomainColorStore.load("malay_wedding")
         let guidance = StyleGuidance.merged(
             project: projectProfiles, global: globalProfiles,
-            hasBundledPack: DomainPackStore.load("malay_wedding") != nil
+            hasBundledPack: DomainPackStore.load("malay_wedding") != nil,
+            bundledColor: colorProfile?.overall
         )
 
         var payload: [String: Any] = [:]
         if let color = guidance.color, let source = guidance.colorSource {
-            payload["color"] = Self.colorJSON(color, source: source)
+            var json = Self.colorJSON(color, source: source)
+            if source == "bundled", let colorProfile {
+                json["learnedFrom"] = "\(colorProfile.videosAnalyzed) reference wedding videos"
+            }
+            payload["color"] = json
+        }
+
+        // Grading presets: looks learned from the dataset, each baked into a bundled LUT.
+        if let colorProfile {
+            let presets: [[String: Any]] = colorProfile.looks.map { look in
+                var entry: [String: Any] = [
+                    "id": look.id,
+                    "name": look.name,
+                    "learnedFromVideos": look.videoCount,
+                    "targets": [
+                        "lumaMean": (Double(look.signature.lumaMean) * 100).rounded() / 100,
+                        "saturation": (Double(look.signature.saturationMean) * 100).rounded() / 100,
+                        "warmCool": (Double(look.signature.warmCoolBias) * 1000).rounded() / 1000,
+                    ],
+                ]
+                if let file = look.lutFile, let url = DomainColorStore.lutURL(fileName: file) {
+                    entry["lutPath"] = url.path
+                }
+                return entry
+            }
+            payload["gradingPresets"] = [
+                "note": "Looks learned from the reference dataset, each baked into a .cube LUT. Apply with apply_color {lut: {path, strength}} (start strength 0.7-0.9), then verify with inspect_color and fine-tune exposure/temperature toward the targets. Prefer the user's own references (color.source project/global) when present; offer these presets when they have none or ask for options.",
+                "presets": presets,
+            ]
         }
         if let source = guidance.tempoSource {
             var tempo: [String: Any] = ["source": source]
@@ -176,7 +206,10 @@ extension ToolExecutor {
             .filter { $0.isStyleReference && $0.type == .video }
             .compactMap { store.assetProfile(url: $0.url) }
         let global = store.globalReferences.compactMap { store.globalProfile(id: $0.id) }
-        let guidance = StyleGuidance.merged(project: project, global: global, hasBundledPack: false)
+        let guidance = StyleGuidance.merged(
+            project: project, global: global, hasBundledPack: false,
+            bundledColor: DomainColorStore.load("malay_wedding")?.overall
+        )
         return guidance.color?.scopes
     }
 

@@ -133,6 +133,39 @@ struct StyleAnalyzerHelperTests {
     }
 }
 
+@Suite("Domain color profile — bundled looks + LUTs")
+@MainActor
+struct DomainColorProfileTests {
+
+    @Test func bundledColorsLoadAndLUTsParse() throws {
+        guard let profile = DomainColorStore.load("malay_wedding") else {
+            Issue.record("malay_wedding color profile not found in bundle")
+            return
+        }
+        #expect(profile.videosAnalyzed > 0)
+        #expect(!profile.looks.isEmpty)
+        for look in profile.looks {
+            #expect(look.lutFile != nil)
+            guard let file = look.lutFile else { continue }
+            guard let url = DomainColorStore.lutURL(fileName: file) else {
+                Issue.record("LUT missing for look \(look.id): \(file)")
+                continue
+            }
+            #expect(LUTLoader.load(path: url.path) != nil, "LUT \(file) must parse as a valid .cube")
+        }
+        #expect(profile.look("lut1") != nil)
+    }
+
+    @Test func bundledColorFeedsGuidanceAsLastFallback() {
+        guard let profile = DomainColorStore.load("malay_wedding") else { return }
+        let g = StyleGuidance.merged(
+            project: [], global: [], hasBundledPack: false, bundledColor: profile.overall
+        )
+        #expect(g.colorSource == "bundled")
+        #expect(g.color == profile.overall)
+    }
+}
+
 @Suite("Style tools")
 @MainActor
 struct StyleToolsTests {

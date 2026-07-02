@@ -959,7 +959,7 @@ enum ToolDefinitions {
         ),
         AgentTool(
             name: .getStyleGuidance,
-            description: "Returns the editing style the user wants followed, merged from their reference videos with per-aspect priority: project references override global ones; the bundled domain pack is the last fallback (each aspect names its source). Covers color targets (apply via color_match_from_reference {useStyleReference: true}), cut tempo (median shot length, BPM, cuts-on-beat), moment ordering, and vibe notes. Call at the start of any editing task. Pass includeFrames to also receive representative frames so you can judge the vibe yourself (store it back via set_style_reference vibeNotes).",
+            description: "Returns the editing style the user wants followed, merged from their reference videos with per-aspect priority: project references override global ones; the bundled domain pack is the last fallback (each aspect names its source). Covers color targets (apply via color_match_from_reference {useStyleReference: true}), gradingPresets — looks learned from real reference wedding videos, each with a bundled .cube LUT applicable via apply_color — cut tempo (median shot length, BPM, cuts-on-beat), moment ordering, and vibe notes. Call at the start of any editing task and for any color-grading request. Pass includeFrames to also receive representative frames so you can judge the vibe yourself (store it back via set_style_reference vibeNotes).",
             inputSchema: objectSchema(
                 properties: [
                     "includeFrames": ["type": "boolean", "description": "Attach up to 3 representative frames per reference tier for vibe reading."],

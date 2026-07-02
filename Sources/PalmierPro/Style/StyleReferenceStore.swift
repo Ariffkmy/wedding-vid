@@ -233,16 +233,22 @@ struct StyleGuidance: Sendable {
     var vibeNotes: [String]
 
     static func merged(
-        project: [StyleProfile], global: [StyleProfile], hasBundledPack: Bool
+        project: [StyleProfile], global: [StyleProfile], hasBundledPack: Bool,
+        bundledColor: ColorSignature? = nil
     ) -> StyleGuidance {
         var g = StyleGuidance(vibeNotes: [])
 
-        // Color: always present in a profile, so first non-empty tier wins.
+        // Color: always present in a profile, so first non-empty tier wins; the
+        // dataset-learned grade is the last fallback.
         for (tier, profiles) in [("project", project), ("global", global)] where g.color == nil {
             if let avg = ColorSignature.average(profiles.map(\.color)) {
                 g.color = avg
                 g.colorSource = tier
             }
+        }
+        if g.color == nil, let bundledColor {
+            g.color = bundledColor
+            g.colorSource = "bundled"
         }
 
         // Tempo: needs music or cut stats.

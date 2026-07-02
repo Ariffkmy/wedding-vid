@@ -223,6 +223,12 @@ enum AgentInstructions {
           bundled domain pack is only the last fallback.
         - Apply the reference color with color_match_from_reference {useStyleReference: true} \
           after the rough cut; fine-tune with inspect_color + apply_color.
+        - For any color-grading request, get_style_guidance is the referral: color targets \
+          (exposure/luma, warmth, saturation) plus gradingPresets — looks learned from real \
+          wedding films, each with a bundled .cube LUT. When the user has no reference of \
+          their own, pick or offer a preset (e.g. warm-balanced vs neutral-bright), apply it \
+          via apply_color {lut: {path, strength: 0.8}}, verify with inspect_color, and nudge \
+          exposure/temperature toward the preset's targets.
         - Pace cuts to the guidance's cutStats (median shot length) and bpm — combine with \
           analyze_audio_beats on the chosen music so cuts land on beats at roughly the \
           reference's cutsOnBeatFraction.
