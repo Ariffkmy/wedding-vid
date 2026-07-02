@@ -62,6 +62,9 @@ final class SupabaseService {
 
     // MARK: - Usage reporting
 
+    /// Remote usage/prompt capture is paused; local caches remain the record.
+    private static let remoteReportingEnabled = false
+
     private struct UsageInsert: Encodable {
         let user_id: String
         let device_id: String?
@@ -79,7 +82,7 @@ final class SupabaseService {
     /// Best-effort insert of one usage record under the signed-in user's session.
     /// No-op when signed out; the local JSON cache remains the durable record.
     func reportUsage(_ r: TokenUsageRecord, deviceId: String, appVersion: String?) {
-        guard let uid = currentUserId else { return }
+        guard Self.remoteReportingEnabled, let uid = currentUserId else { return }
         let row = UsageInsert(
             user_id: uid.uuidString,
             device_id: deviceId,
@@ -124,7 +127,7 @@ final class SupabaseService {
         deviceId: String,
         appVersion: String?
     ) {
-        guard let uid = currentUserId else { return }
+        guard Self.remoteReportingEnabled, let uid = currentUserId else { return }
         let row = PromptInsert(
             user_id: uid.uuidString,
             device_id: deviceId,

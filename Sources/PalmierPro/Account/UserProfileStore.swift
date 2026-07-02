@@ -42,7 +42,7 @@ final class UserProfileStore {
         guard let uid = SupabaseService.shared.currentUserId else { return }
         do {
             let rows: [Profile] = try await SupabaseService.shared.client
-                .from("profiles")
+                .from("user_profiles")
                 .select("user_id, editing_domain, onboarding_completed_at")
                 .eq("user_id", value: uid.uuidString)
                 .execute()
@@ -77,7 +77,7 @@ final class UserProfileStore {
         let client = SupabaseService.shared.client
         Task.detached(priority: .utility) {
             do {
-                try await client.from("profiles").upsert(p).execute()
+                try await client.from("user_profiles").upsert(p).execute()
             } catch {
                 Log.account.warning("profile upsert failed: \(error.localizedDescription)")
             }
