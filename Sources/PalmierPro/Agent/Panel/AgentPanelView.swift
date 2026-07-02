@@ -5,39 +5,14 @@ struct AgentPanelView: View {
 
     private static let starterPrompts: [AgentStarterPrompt] = [
         AgentStarterPrompt(
-            title: "Generate an AI video",
+            title: "Create me a wedding highlight video",
             systemImage: "sparkles",
-            prompt: "Generate an AI video of "
+            prompt: "Create a wedding highlight video from the footage and music already in my project. Read the malay-wedding-editing skill first, classify the moments on-device, skip test/junk shots, then cut a cinematic highlight (~3–4 minutes, or the song's length) synced to the music beats. Feature the akad nikah and salam original audio, keep the music ducked under them, grade it warm, and add a simple title. Use what's already imported — don't ask me where the footage or song is."
         ),
         AgentStarterPrompt(
-            title: "Generate B-roll",
-            systemImage: "film",
-            prompt: "Generate B-roll for my timeline. Inspect the current edit, identify sections that would benefit from cutaways, generate suitable B-roll, and place it where it supports the story."
-        ),
-        AgentStarterPrompt(
-            title: "Create a letterbox opening",
-            systemImage: "camera.aperture",
-            prompt: "Create a cinematic opening for my timeline. Use the first visual clip, animate a subtle letterbox matte with top and bottom crop keyframes, starting from crop to uncrop,and keep the motion restrained and polished."
-        ),
-        AgentStarterPrompt(
-            title: "Add captions to my timeline",
-            systemImage: "captions.bubble",
-            prompt: "Add captions to my timeline. Transcribe spoken audio in timeline clips, build readable caption phrases on word boundaries, and place them as text clips aligned to the edit."
-        ),
-        AgentStarterPrompt(
-            title: "Create a voiceover",
-            systemImage: "waveform",
-            prompt: "Create a voiceover for my timeline. Draft concise narration for the current edit, generate the voiceover, and add it to an audio track aligned with the timeline."
-        ),
-        AgentStarterPrompt(
-            title: "Generate music and sync to my timeline",
-            systemImage: "music.note",
-            prompt: "Score my timeline with music. Inspect the edit's mood and pacing, generate music for the full timeline, and place it on an audio track aligned to the edit."
-        ),
-        AgentStarterPrompt(
-            title: "Organize my media into structured folders",
-            systemImage: "folder",
-            prompt: "Organize my media into structured folders. Review all assets, create clearly named folders by role, scene, or type, move assets into them, and rename generic files when useful. Don't delete anything or change the timeline."
+            title: "Create me a full wedding video",
+            systemImage: "film.stack",
+            prompt: "Create a full-length wedding video from the footage and music already in my project. Read the malay-wedding-editing skill first, classify the moments on-device, skip test/junk shots, then assemble the whole ceremony in canonical order (persiapan, ketibaan, akad nikah, salam, bersanding, kenduri). Keep the important moments and their original audio (akad vows, salam, doa) intact, use music as a bed under montage sections, and grade it warm. Use what's already imported — don't ask me where the footage or song is."
         ),
     ]
 

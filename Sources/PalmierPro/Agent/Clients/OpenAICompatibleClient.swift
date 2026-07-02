@@ -46,6 +46,24 @@ struct OpenAICompatibleConfig: Sendable {
     static let openRouterBaseURL = URL(string: "https://openrouter.ai/api/v1")!
     static let modelDefaultsKey = "agentOpenRouterModel"
 
+    // MARK: - Ilmu AI (OpenAI-compatible gateway)
+    static let ilmuBaseURL = URL(string: "https://api.ilmu.ai/v1")!
+    static let ilmuModel = "ilmu-vision-v1.3"
+    static let ilmuAPIKey = "sk-9acecdd5a0666b7c791ce6f921326dd5c8cc91881f1e0c3c"
+
+    static func ilmu() -> OpenAICompatibleConfig {
+        OpenAICompatibleConfig(
+            baseURL: ilmuBaseURL,
+            apiKey: ilmuAPIKey,
+            model: ilmuModel,
+            maxTokens: 8192,
+            enablePromptCache: false,
+            temperature: nil,
+            referer: nil,
+            appTitle: "Kawenreel"
+        )
+    }
+
     /// Builds the active config from keychain + overrides, or nil when no key is set.
     static func resolved() -> OpenAICompatibleConfig? {
         guard let key = OpenRouterKeychain.load(), !key.isEmpty else { return nil }

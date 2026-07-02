@@ -68,11 +68,50 @@ final class AgentService {
         switch providerMode {
         case .claudeOwnKey:
             return hasApiKey
+        case .ilmuAI:
+            return true
         case .defaultSetting:
             if hasOpenRouterKey { return true }
             let account = AccountService.shared
             return account.isSignedIn && account.hasCredits
         }
+    }
+
+    /// Compact live snapshot of the project injected into the system prompt every turn, so the
+    /// agent always knows what's already imported / on the timeline and never asks the user.
+    private var projectSnapshot: String {
+        guard let editor else { return "" }
+        let t = editor.timeline
+        let totalSec = t.fps > 0 ? Double(t.totalFrames) / Double(t.fps) : 0
+
+        var vIdx = 0, aIdx = 0
+        let trackLines: [String] = t.tracks.map { track in
+            let label: String
+            if track.type == .audio { aIdx += 1; label = "A\(aIdx)" } else { vIdx += 1; label = "V\(vIdx)" }
+            return "\(label)/\(track.type.rawValue): \(track.clips.count) clip(s)"
+        }
+        let tracksDesc = trackLines.isEmpty ? "empty (no tracks yet)" : trackLines.joined(separator: ", ")
+
+        let assets = editor.mediaAssets
+        let vids = assets.filter { $0.type == .video }
+        let auds = assets.filter { $0.type == .audio }
+        let imgs = assets.filter { $0.type == .image }
+        func names(_ xs: [MediaAsset], _ maxN: Int) -> String {
+            let shown = xs.prefix(maxN).map { "\"\($0.name)\"" }.joined(separator: ", ")
+            return xs.count > maxN ? shown + " +\(xs.count - maxN) more" : shown
+        }
+        var lib = ["\(vids.count) video, \(auds.count) audio, \(imgs.count) image"]
+        if !auds.isEmpty { lib.append("audio: \(names(auds, 8))") }
+        if !imgs.isEmpty { lib.append("images: \(names(imgs, 6))") }
+        if !vids.isEmpty { lib.append("video e.g. \(names(vids, 4))") }
+
+        return """
+
+
+            # Current project (live — never ask the user what's imported or on the timeline; it's already here. Use get_media / get_timeline for full detail before editing.)
+            - Timeline: \(t.width)×\(t.height) @ \(t.fps)fps, \(String(format: "%.1f", totalSec))s — \(tracksDesc).
+            - Media library: \(lib.joined(separator: "; ")).
+            """
     }
 
     var availableModels: [AnthropicModel] {
@@ -86,6 +125,8 @@ final class AgentService {
         case .claudeOwnKey:
             guard hasApiKey else { return nil }
             return AnthropicClient(apiKey: apiKey, model: chosen)
+        case .ilmuAI:
+            return OpenAICompatibleClient(config: .ilmu())
         case .defaultSetting:
             if let config = OpenAICompatibleConfig.resolved() {
                 return OpenAICompatibleClient(config: config)
@@ -410,7 +451,7 @@ final class AgentService {
 
             do {
                 let stream = client.stream(
-                    system: AgentInstructions.serverInstructions + AgentInstructions.skillsSection(SkillStore.shared.skillIndex),
+                    system: AgentInstructions.serverInstructions + AgentInstructions.skillsSection(SkillStore.shared.skillIndex) + projectSnapshot,
                     tools: tools,
                     messages: apiMsgs
                 )
